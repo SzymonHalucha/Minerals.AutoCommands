@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minerals.AutoCommands", "Minerals.AutoCommands\Minerals.AutoCommands.csproj", "{B19E66D1-81A8-4627-86C3-B5281A625653}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minerals.AutoCommands.Tests", "Minerals.AutoCommands.Tests\Minerals.AutoCommands.Tests.csproj", "{A8AF5A32-E009-47D5-AD24-D404716D1917}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B19E66D1-81A8-4627-86C3-B5281A625653}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B19E66D1-81A8-4627-86C3-B5281A625653}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B19E66D1-81A8-4627-86C3-B5281A625653}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B19E66D1-81A8-4627-86C3-B5281A625653}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {18200F7A-2839-4293-9DD5-A3C1451A5CD0}
+	EndGlobalSection
+EndGlobal
