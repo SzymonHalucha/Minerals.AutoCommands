@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minerals.AutoCommands", "Mi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minerals.AutoCommands.Tests", "Minerals.AutoCommands.Tests\Minerals.AutoCommands.Tests.csproj", "{A8AF5A32-E009-47D5-AD24-D404716D1917}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minerals.AutoCommands.Benchmarks", "Minerals.AutoCommands.Benchmarks\Minerals.AutoCommands.Benchmarks.csproj", "{882FFDA9-73FF-4198-A03D-02AFD4F29F14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8AF5A32-E009-47D5-AD24-D404716D1917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{882FFDA9-73FF-4198-A03D-02AFD4F29F14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{882FFDA9-73FF-4198-A03D-02AFD4F29F14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{882FFDA9-73FF-4198-A03D-02AFD4F29F14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{882FFDA9-73FF-4198-A03D-02AFD4F29F14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
