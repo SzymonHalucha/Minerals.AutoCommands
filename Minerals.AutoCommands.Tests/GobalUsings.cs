@@ -1,15 +1,11 @@
-global using System;
 global using System.Text;
-global using System.Linq;
 global using System.Threading.Tasks;
-global using System.Collections.Generic;
-global using System.Runtime.CompilerServices;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.CSharp;
-global using Xunit;
+global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using DiffEngine;
 global using VerifyTests;
-global using VerifyXunit;
+global using VerifyMSTest;
 global using Minerals.AutoCommands;
 global using Minerals.AutoCommands.Attributes;
 global using Minerals.AutoCommands.Interfaces;

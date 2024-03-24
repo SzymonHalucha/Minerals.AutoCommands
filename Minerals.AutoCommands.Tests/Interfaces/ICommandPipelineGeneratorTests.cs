@@ -1,11 +1,17 @@
-namespace Minerals.AutoCommands.Tests.Interfaces
+namespace Minerals.AutoCommands.Tests.Attributes
 {
-    public class ICommandPipelineGeneratorTests
+    [TestClass]
+    public class ICommandPipelineGeneratorTests : VerifyBase
     {
-        [Fact]
+        public ICommandPipelineGeneratorTests()
+        {
+            VerifyExtensions.InitializeGlobalSettings();
+        }
+
+        [TestMethod]
         public Task Interface_ShouldGenerate()
         {
-            return TestsHelpers.VerifyGenerator(new ICommandPipelineGenerator(), []);
+            return this.VerifyIncrementalGenerators(new ICommandPipelineGenerator());
         }
     }
 }

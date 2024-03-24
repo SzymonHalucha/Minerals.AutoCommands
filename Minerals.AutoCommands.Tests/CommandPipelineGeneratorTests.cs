@@ -1,17 +1,27 @@
 namespace Minerals.AutoCommands.Tests
 {
-    public class CommandPipelineGeneratorTests
+    [TestClass]
+    public class CommandPipelineGeneratorTests : VerifyBase
     {
-        [Fact]
+        public CommandPipelineGeneratorTests()
+        {
+            VerifyExtensions.InitializeGlobalSettings();
+        }
+
+        [TestMethod]
         public Task PartialClass_ShouldGenerateCommandPipeline()
         {
-            string source = TestsHelpers.MakeTestNamespace("",
-            """
-            [Minerals.AutoCommands.CommandPipeline]
-            public partial class PipelineTestClass
+            const string source = """
+            using Minerals.AutoCommands;
+
+            namespace Minerals.Tests
             {
+                [CommandPipeline]
+                public partial class PipelineTestClass
+                {
+                }
             }
-            """);
+            """;
 
             IIncrementalGenerator[] additional =
             [
@@ -21,7 +31,7 @@ namespace Minerals.AutoCommands.Tests
                 new InvalidCommandGenerator(),
                 new ICommandGenerator()
             ];
-            return TestsHelpers.VerifyGenerator(source, new CommandPipelineGenerator(), additional);
+            return this.VerifyIncrementalGenerators(source, new CommandPipelineGenerator(), additional);
         }
     }
 }

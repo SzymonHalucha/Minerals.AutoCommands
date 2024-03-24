@@ -1,11 +1,17 @@
 namespace Minerals.AutoCommands.Tests
 {
-    public class InvalidCommandGeneratorTests
+    [TestClass]
+    public class InvalidCommandGeneratorTests : VerifyBase
     {
-        [Fact]
+        public InvalidCommandGeneratorTests()
+        {
+            VerifyExtensions.InitializeGlobalSettings();
+        }
+
+        [TestMethod]
         public Task Class_ShouldGenerate()
         {
-            return TestsHelpers.VerifyGenerator(new InvalidCommandGenerator(), []);
+            return this.VerifyIncrementalGenerators(new InvalidCommandGenerator());
         }
     }
 }

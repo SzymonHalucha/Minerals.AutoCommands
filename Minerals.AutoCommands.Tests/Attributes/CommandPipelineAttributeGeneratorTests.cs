@@ -1,11 +1,17 @@
 namespace Minerals.AutoCommands.Tests.Attributes
 {
-    public class CommandPipelineAttributeGeneratorTests
+    [TestClass]
+    public class CommandPipelineAttributeGeneratorTests : VerifyBase
     {
-        [Fact]
+        public CommandPipelineAttributeGeneratorTests()
+        {
+            VerifyExtensions.InitializeGlobalSettings();
+        }
+
+        [TestMethod]
         public Task Attribute_ShouldGenerate()
         {
-            return TestsHelpers.VerifyGenerator(new CommandPipelineAttributeGenerator(), []);
+            return this.VerifyIncrementalGenerators(new CommandPipelineAttributeGenerator());
         }
     }
 }
