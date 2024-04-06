@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <RootNamespace>Minerals.AutoCommands.Generators</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>0.2.0</Version>
+        <Title>AutoCommands.Generators</Title>
+        <Authors>Szymon Hałucha</Authors>
+        <Product>AutoCommands.Generators</Product>
+        <Description>Package that uses incremental generators to provide useful attributes for creating CLI tools for dotnet platform</Description>
+        <Copyright>Copyright © Szymon Hałucha 2024</Copyright>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <RepositoryUrl>https://github.com/SzymonHalucha/Minerals.AutoCommands.git</RepositoryUrl>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <RepositoryBranch>v$(Version)</RepositoryBranch>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <IsPackable>true</IsPackable>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.*" PrivateAssets="all" />
+    </ItemGroup>
+
+</Project>

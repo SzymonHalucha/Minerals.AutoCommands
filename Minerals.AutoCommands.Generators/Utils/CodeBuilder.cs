@@ -1,4 +1,4 @@
-namespace Minerals.AutoCommands.Utils
+namespace Minerals.AutoCommands.Generators.Utils
 {
     public class CodeBuilder
     {
@@ -17,7 +17,7 @@ namespace Minerals.AutoCommands.Utils
         {
             _indentationLevel = indentationLevel;
             _indentationSize = indentationSize;
-            _builder = new(builderStartCapacity);
+            _builder = new StringBuilder(builderStartCapacity);
         }
 
         public CodeBuilder Write(string text)
@@ -49,7 +49,7 @@ namespace Minerals.AutoCommands.Utils
             while (moveNext)
             {
                 moveNext = enumerator.MoveNext();
-                iterator(this, current, !moveNext);
+                iterator(this, current, moveNext);
                 current = enumerator.Current;
             }
             return this;
@@ -85,37 +85,45 @@ namespace Minerals.AutoCommands.Utils
             return this;
         }
 
-        public CodeBuilder CloseBlock(bool newLine = false, bool appendSemicolon = false)
+        public CodeBuilder CloseBlock()
         {
             _indentationLevel--;
+            AppendLine("}");
+            return this;
+        }
+
+        public CodeBuilder CloseBlock(bool appendSemicolon)
+        {
+            _indentationLevel--;
+            AppendLine("}");
             if (appendSemicolon)
             {
-                AppendLine("};");
-            }
-            else
-            {
-                AppendLine("}");
-            }
-            if (newLine)
-            {
-                AppendLine("");
+                Append(";");
             }
             return this;
         }
 
-        public CodeBuilder WriteBlock(string text, bool newLine = false, bool appendSemicolon = false)
+        public CodeBuilder CloseAllBlocks()
         {
-            OpenBlock();
-            AppendLine(text);
-            CloseBlock(newLine, appendSemicolon);
+            for (int i = 0; i <= _indentationLevel; i++)
+            {
+                CloseBlock();
+            }
             return this;
         }
 
-        public CodeBuilder WriteBlock(Action<CodeBuilder> writer, bool newLine = false, bool appendSemicolon = false)
+        public CodeBuilder WriteBlock(string text)
         {
-            OpenBlock();
+            foreach (var line in text.Split('\n'))
+            {
+                Append(line, true);
+            }
+            return this;
+        }
+
+        public CodeBuilder WriteBlock(Action<CodeBuilder> writer)
+        {
             writer(this);
-            CloseBlock(newLine, appendSemicolon);
             return this;
         }
 
@@ -128,29 +136,41 @@ namespace Minerals.AutoCommands.Utils
             return null;
         }
 
+        public CodeBuilder NewLine()
+        {
+            _builder.AppendLine();
+            return this;
+        }
+
+        public void Clear()
+        {
+            _builder.Clear();
+        }
+
         public override string ToString()
         {
             return _builder.ToString();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Append(string text)
+        private void Append(string text, bool forceIndentation = false)
         {
-            AppendIndentation();
+            AppendIndentation(forceIndentation);
             _builder.Append(text);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AppendLine(string text)
         {
+            _builder.AppendLine();
             AppendIndentation();
-            _builder.AppendLine(text);
+            _builder.Append(text);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void AppendIndentation()
+        private void AppendIndentation(bool force = false)
         {
-            if (_builder.Length > 0 && _builder[_builder.Length - 1].Equals('\n'))
+            if (force || (_builder.Length > 0 && _builder[_builder.Length - 1].Equals('\n')))
             {
                 _builder.Append(' ', _indentationSize * _indentationLevel);
             }

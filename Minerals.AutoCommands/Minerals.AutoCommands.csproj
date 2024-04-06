@@ -5,13 +5,12 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
-        <IsRoslynComponent>true</IsRoslynComponent>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RootNamespace>Minerals.AutoCommands</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.1.1</Version>
+        <Version>0.2.0</Version>
         <Title>AutoCommands</Title>
         <Authors>Szymon Hałucha</Authors>
         <Product>AutoCommands</Product>
@@ -25,7 +24,7 @@
         <PackageProjectUrl>https://github.com/SzymonHalucha/Minerals.AutoCommands</PackageProjectUrl>
         <PackageTags>attribute, attributes, generator, generation, cli, dotnet, tool, tools, commands</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageReleaseNotes>Changed code building system</PackageReleaseNotes>
+        <PackageReleaseNotes>Changed public api</PackageReleaseNotes>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
 
@@ -37,21 +36,22 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <EnablePackageValidation>true</EnablePackageValidation>
-        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
         <Optimize>true</Optimize>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="" />
         <None Include="..\LICENSE" Pack="true" PackagePath="" />
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+        <None Include="..\Minerals.AutoCommands.Generators\bin\$(Configuration)\netstandard2.0\Minerals.AutoCommands.Generators.dll" Pack="true" PackagePath="analyzers\dotnet\cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.*" PrivateAssets="all" />
-        <PackageReference Update="NETStandard.Library" PrivateAssets="all" />
+        <ProjectReference Include="..\Minerals.AutoCommands.Generators\Minerals.AutoCommands.Generators.csproj">
+            <OutputItemType>Analyzer</OutputItemType>
+            <PrivateAssets>all</PrivateAssets>
+        </ProjectReference>
     </ItemGroup>
 
 </Project>

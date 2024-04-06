@@ -1,4 +1,4 @@
-namespace Minerals.AutoCommands.Utils
+namespace Minerals.AutoCommands.Generators.Utils
 {
     public static class SyntaxExtensions
     {

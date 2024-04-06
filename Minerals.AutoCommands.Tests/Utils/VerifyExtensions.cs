@@ -2,119 +2,199 @@ namespace Minerals.AutoCommands.Tests.Utils
 {
     public static class VerifyExtensions
     {
-        public static bool ScrubSingleLineComments { get; set; } = true;
-        public static bool RemoveEmptyLines { get; set; } = false;
-
+        private static IEnumerable<string> _globalUsings = Array.Empty<string>();
+        private static IEnumerable<MetadataReference> _globalReferences = Array.Empty<MetadataReference>();
+        private static bool _scrubCommentLines = true;
         private static bool _isInitialized = false;
 
-        public static void InitializeGlobalSettings()
+        public static void Initialize
+        (
+            IEnumerable<string> globalUsings,
+            IEnumerable<MetadataReference> globalReferences,
+            bool removeCommentLines = true,
+            IEnumerable<DiffTool>? order = null
+        )
         {
-            if (_isInitialized)
+            if (order == null)
             {
-                return;
+                order = new DiffTool[] { DiffTool.VisualStudioCode, DiffTool.VisualStudio, DiffTool.Rider, DiffTool.Neovim, DiffTool.Vim };
             }
-            DiffTools.UseOrder(DiffTool.VisualStudioCode, DiffTool.VisualStudio, DiffTool.Rider);
-            VerifyBase.UseProjectRelativeDirectory("Snapshots");
-            VerifierSettings.UseEncoding(Encoding.UTF8);
-            VerifySourceGenerators.Initialize();
-            _isInitialized = true;
+
+            if (!_isInitialized)
+            {
+                DiffTools.UseOrder(order.ToArray());
+                VerifyBase.UseProjectRelativeDirectory("Snapshots");
+                VerifierSettings.UseEncoding(System.Text.Encoding.UTF8);
+                VerifySourceGenerators.Initialize();
+                _globalUsings = globalUsings;
+                _globalReferences = globalReferences;
+                _scrubCommentLines = removeCommentLines;
+                _isInitialized = true;
+            }
         }
 
-        public static Task VerifyIncrementalGenerators(this VerifyBase instance, IIncrementalGenerator target)
+        public static IEnumerable<MetadataReference> GetAppReferences(params Type[] additionalReferences)
         {
-            return VerifyIncrementalGenerators(instance, [target], []);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetReferencedAssemblies());
+            assemblies = assemblies.Concat(additionalReferences.Select(x => x.Assembly.GetName()));
+            return assemblies.Select(x => MetadataReference.CreateFromFile(Assembly.Load(x).Location));
+        }
+
+        public static Task VerifyIncrementalGenerators
+        (
+            this VerifyBase instance,
+            IIncrementalGenerator target
+        )
+        {
+            var targets = new IIncrementalGenerator[] { target };
+            var additional = Array.Empty<IIncrementalGenerator>();
+            return VerifyIncrementalGenerators(instance, targets, additional);
         }
 
         public static Task VerifyIncrementalGenerators
         (
             this VerifyBase instance,
             IIncrementalGenerator target,
-            IIncrementalGenerator[] additional
+            IEnumerable<IIncrementalGenerator> additional
         )
         {
-            return VerifyIncrementalGenerators(instance, [target], additional);
+            var targets = new IIncrementalGenerator[] { target };
+            return VerifyIncrementalGenerators(instance, targets, additional);
         }
 
         public static Task VerifyIncrementalGenerators
         (
             this VerifyBase instance,
-            IIncrementalGenerator[] targets,
-            IIncrementalGenerator[] additional
+            string source,
+            IIncrementalGenerator target
         )
         {
-            var compilation = CSharpCompilation.Create("Minerals.Tests");
-            CSharpGeneratorDriver.Create(additional)
-                .RunGeneratorsAndUpdateCompilation
-                (
-                    compilation,
-                    out var newCompilation,
-                    out _
-                );
+            var targets = new IIncrementalGenerator[] { target };
+            var additional = Array.Empty<IIncrementalGenerator>();
+            return VerifyIncrementalGenerators(instance, source, targets, additional);
+        }
 
-            var driver = CSharpGeneratorDriver.Create(targets)
-                .RunGenerators(newCompilation);
+        public static Task VerifyIncrementalGenerators
+        (
+            this VerifyBase instance,
+            string source,
+            IEnumerable<IIncrementalGenerator> targets
+        )
+        {
+            var additional = Array.Empty<IIncrementalGenerator>();
+            return VerifyIncrementalGenerators(instance, source, targets, additional);
+        }
+
+        public static Task VerifyIncrementalGenerators
+        (
+            this VerifyBase instance,
+            string source,
+            IIncrementalGenerator target,
+            IEnumerable<IIncrementalGenerator> additional
+        )
+        {
+            var targets = new IIncrementalGenerator[] { target };
+            return VerifyIncrementalGenerators(instance, source, targets, additional);
+        }
+
+        public static Task VerifyIncrementalGenerators
+        (
+            this VerifyBase instance,
+            IEnumerable<IIncrementalGenerator> targets,
+            IEnumerable<IIncrementalGenerator> additional
+        )
+        {
+            var cSharpCmp = CSharpCompilation.Create("Tests")
+                .AddReferences(_globalReferences)
+                .WithOptions(new CSharpCompilationOptions
+                (
+                    OutputKind.DynamicallyLinkedLibrary,
+                    nullableContextOptions: NullableContextOptions.Enable,
+                    optimizationLevel: OptimizationLevel.Release,
+                    usings: _globalUsings
+                ));
+
+            CSharpGeneratorDriver.Create(additional.ToArray())
+                .RunGeneratorsAndUpdateCompilation(cSharpCmp, out var cmp, out _);
+
+            var driver = CSharpGeneratorDriver.Create(targets.ToArray())
+                .RunGeneratorsAndUpdateCompilation(cmp, out cmp, out _);
+
+            foreach (var diag in cmp.GetDiagnostics())
+            {
+                var path = diag.Location.GetLineSpan().Path;
+                var start = diag.Location.GetLineSpan().StartLinePosition.Line;
+                var end = diag.Location.GetLineSpan().EndLinePosition.Line;
+                Console.WriteLine($"({path}) [{start}-{end}]: {diag.GetMessage()}.\n");
+            }
 
             return ApplyDynamicSettings(instance.Verify(driver.GetRunResult()));
         }
 
-        public static Task VerifyIncrementalGenerators(this VerifyBase instance, string source, IIncrementalGenerator target)
-        {
-            return VerifyIncrementalGenerators(instance, source, [target], []);
-        }
-
         public static Task VerifyIncrementalGenerators
         (
             this VerifyBase instance,
             string source,
-            IIncrementalGenerator target,
-            IIncrementalGenerator[] additional
-        )
-        {
-            return VerifyIncrementalGenerators(instance, source, [target], additional);
-        }
-
-        public static Task VerifyIncrementalGenerators
-        (
-            this VerifyBase instance,
-            string source,
-            IIncrementalGenerator[] targets,
-            IIncrementalGenerator[] additional
+            IEnumerable<IIncrementalGenerator> targets,
+            IEnumerable<IIncrementalGenerator> additional
         )
         {
             var tree = CSharpSyntaxTree.ParseText(source);
-            var compilation = CSharpCompilation.Create
-            (
-                "Minerals.Tests",
-                [tree],
-                [MetadataReference.CreateFromFile(tree.GetType().Assembly.Location)]
-            );
-
-            CSharpGeneratorDriver.Create(additional)
-                .RunGeneratorsAndUpdateCompilation
+            var cSharpCmp = CSharpCompilation.Create("Tests")
+                .AddReferences(MetadataReference.CreateFromFile(tree.GetType().Assembly.Location))
+                .AddReferences(_globalReferences)
+                .AddSyntaxTrees(tree)
+                .WithOptions(new CSharpCompilationOptions
                 (
-                    compilation,
-                    out var newCompilation,
-                    out _
-                );
+                    OutputKind.DynamicallyLinkedLibrary,
+                    nullableContextOptions: NullableContextOptions.Enable,
+                    optimizationLevel: OptimizationLevel.Release,
+                    usings: _globalUsings
+                ));
 
-            var driver = CSharpGeneratorDriver.Create(targets)
-                .RunGenerators(newCompilation);
+            CSharpGeneratorDriver.Create(additional.ToArray())
+                .RunGeneratorsAndUpdateCompilation(cSharpCmp, out var cmp, out _);
+
+            var driver = CSharpGeneratorDriver.Create(targets.ToArray())
+                .RunGeneratorsAndUpdateCompilation(cmp, out cmp, out _);
+
+            foreach (var diag in cmp.GetDiagnostics())
+            {
+                var path = diag.Location.GetLineSpan().Path;
+                var start = diag.Location.GetLineSpan().StartLinePosition.Line;
+                var end = diag.Location.GetLineSpan().EndLinePosition.Line;
+                Console.WriteLine($"({path}) [{start}-{end}]: {diag.GetMessage()}.\n");
+            }
 
             return ApplyDynamicSettings(instance.Verify(driver.GetRunResult()));
         }
 
         private static SettingsTask ApplyDynamicSettings(SettingsTask task)
         {
-            if (ScrubSingleLineComments)
+            bool isBlockComment = false;
+            if (_scrubCommentLines)
             {
                 task.ScrubLines("cs", x =>
                 {
-                    return x.StartsWith("//");
+                    if (isBlockComment && x.Contains("*/"))
+                    {
+                        isBlockComment = false;
+                        return true;
+                    }
+                    else if (isBlockComment)
+                    {
+                        return true;
+                    }
+                    else if (x.Contains("/*"))
+                    {
+                        isBlockComment = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return x.Replace(" ", "").StartsWith("//");
+                    }
                 });
-            }
-            if (RemoveEmptyLines)
-            {
-                task.ScrubEmptyLines();
             }
             return task;
         }
