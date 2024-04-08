@@ -2,14 +2,12 @@ namespace Minerals.AutoCommands.Tests.Utils
 {
     public static class VerifyExtensions
     {
-        private static IEnumerable<string> _globalUsings = Array.Empty<string>();
         private static IEnumerable<MetadataReference> _globalReferences = Array.Empty<MetadataReference>();
         private static bool _scrubCommentLines = true;
         private static bool _isInitialized = false;
 
         public static void Initialize
         (
-            IEnumerable<string> globalUsings,
             IEnumerable<MetadataReference> globalReferences,
             bool removeCommentLines = true,
             IEnumerable<DiffTool>? order = null
@@ -26,7 +24,6 @@ namespace Minerals.AutoCommands.Tests.Utils
                 VerifyBase.UseProjectRelativeDirectory("Snapshots");
                 VerifierSettings.UseEncoding(System.Text.Encoding.UTF8);
                 VerifySourceGenerators.Initialize();
-                _globalUsings = globalUsings;
                 _globalReferences = globalReferences;
                 _scrubCommentLines = removeCommentLines;
                 _isInitialized = true;
@@ -110,8 +107,7 @@ namespace Minerals.AutoCommands.Tests.Utils
                 (
                     OutputKind.DynamicallyLinkedLibrary,
                     nullableContextOptions: NullableContextOptions.Enable,
-                    optimizationLevel: OptimizationLevel.Release,
-                    usings: _globalUsings
+                    optimizationLevel: OptimizationLevel.Release
                 ));
 
             CSharpGeneratorDriver.Create(additional.ToArray())
@@ -148,8 +144,7 @@ namespace Minerals.AutoCommands.Tests.Utils
                 (
                     OutputKind.DynamicallyLinkedLibrary,
                     nullableContextOptions: NullableContextOptions.Enable,
-                    optimizationLevel: OptimizationLevel.Release,
-                    usings: _globalUsings
+                    optimizationLevel: OptimizationLevel.Release
                 ));
 
             CSharpGeneratorDriver.Create(additional.ToArray())

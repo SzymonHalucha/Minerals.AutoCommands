@@ -11,12 +11,8 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.2.0</Version>
         <Title>AutoCommands.Generators</Title>
-        <Authors>Szymon Hałucha</Authors>
         <Product>AutoCommands.Generators</Product>
-        <Description>Package that uses incremental generators to provide useful attributes for creating CLI tools for dotnet platform</Description>
-        <Copyright>Copyright © Szymon Hałucha 2024</Copyright>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -24,11 +20,6 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <RepositoryBranch>v$(Version)</RepositoryBranch>
         <RepositoryType>git</RepositoryType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-        <IsPackable>true</IsPackable>
-        <Optimize>true</Optimize>
     </PropertyGroup>
 
     <ItemGroup>

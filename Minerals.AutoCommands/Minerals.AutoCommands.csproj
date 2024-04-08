@@ -6,7 +6,6 @@
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
         <RootNamespace>Minerals.AutoCommands</RootNamespace>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -36,7 +35,8 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
         <EnablePackageValidation>true</EnablePackageValidation>
         <Optimize>true</Optimize>
     </PropertyGroup>
@@ -44,14 +44,18 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="" />
         <None Include="..\LICENSE" Pack="true" PackagePath="" />
-        <None Include="..\Minerals.AutoCommands.Generators\bin\$(Configuration)\netstandard2.0\Minerals.AutoCommands.Generators.dll" Pack="true" PackagePath="analyzers\dotnet\cs" />
+        <None Include="..\Minerals.AutoCommands.Generators\bin\$(Configuration)\netstandard2.0\Minerals.AutoCommands.Generators.dll"
+            Pack="true" PackagePath="analyzers\dotnet\cs" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Minerals.AutoCommands.Generators\Minerals.AutoCommands.Generators.csproj">
-            <OutputItemType>Analyzer</OutputItemType>
-            <PrivateAssets>all</PrivateAssets>
-        </ProjectReference>
-    </ItemGroup>
+    <Target Name="CustomCompile" BeforeTargets="Compile">
+        <MSBuild Projects="..\Minerals.AutoCommands.Generators\Minerals.AutoCommands.Generators.csproj"
+            Properties="Configuration=$(Configuration);
+                        Optimize=$(Optimize);
+                        Version=$(Version);
+                        Authors=$(Authors);
+                        Description=$(Description);
+                        Copyright=$(Copyright)" />
+    </Target>
 
 </Project>

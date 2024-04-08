@@ -5,22 +5,15 @@ namespace Minerals.AutoCommands.Tests
     {
         public CommandParserGeneratorTests()
         {
-            string[] usings =
-            [
-                "System",
-                "System.Linq",
-                "System.Text",
-                "System.Threading.Tasks",
-                "System.Collections.Generic",
-            ];
             var references = VerifyExtensions.GetAppReferences
             (
-                typeof(CommandPipeline),
+                typeof(object),
+                typeof(CommandPipelineHandlers),
                 typeof(CommandStatementAttribute),
                 typeof(CommandOrderException),
                 typeof(ICommandStatement)
             );
-            VerifyExtensions.Initialize(usings, references);
+            VerifyExtensions.Initialize(references);
         }
     }
 }
