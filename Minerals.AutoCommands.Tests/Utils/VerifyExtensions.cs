@@ -3,13 +3,15 @@ namespace Minerals.AutoCommands.Tests.Utils
     public static class VerifyExtensions
     {
         private static IEnumerable<MetadataReference> _globalReferences = Array.Empty<MetadataReference>();
-        private static bool _scrubCommentLines = true;
+        private static bool _scrubCommentLines = false;
+        private static bool _scrubVersionInfo = true;
         private static bool _isInitialized = false;
 
         public static void Initialize
         (
             IEnumerable<MetadataReference> globalReferences,
-            bool removeCommentLines = true,
+            bool removeVersionInfo = true,
+            bool removeCommentLines = false,
             IEnumerable<DiffTool>? order = null
         )
         {
@@ -26,6 +28,7 @@ namespace Minerals.AutoCommands.Tests.Utils
                 VerifySourceGenerators.Initialize();
                 _globalReferences = globalReferences;
                 _scrubCommentLines = removeCommentLines;
+                _scrubVersionInfo = removeVersionInfo;
                 _isInitialized = true;
             }
         }
@@ -114,7 +117,7 @@ namespace Minerals.AutoCommands.Tests.Utils
                 .RunGeneratorsAndUpdateCompilation(cSharpCmp, out var cmp, out _);
 
             var driver = CSharpGeneratorDriver.Create(targets.ToArray())
-                .RunGeneratorsAndUpdateCompilation(cmp, out cmp, out _);
+                .RunGenerators(cmp);
 
             foreach (var diag in cmp.GetDiagnostics())
             {
@@ -151,7 +154,7 @@ namespace Minerals.AutoCommands.Tests.Utils
                 .RunGeneratorsAndUpdateCompilation(cSharpCmp, out var cmp, out _);
 
             var driver = CSharpGeneratorDriver.Create(targets.ToArray())
-                .RunGeneratorsAndUpdateCompilation(cmp, out cmp, out _);
+                .RunGenerators(cmp);
 
             foreach (var diag in cmp.GetDiagnostics())
             {
@@ -166,9 +169,9 @@ namespace Minerals.AutoCommands.Tests.Utils
 
         private static SettingsTask ApplyDynamicSettings(SettingsTask task)
         {
-            bool isBlockComment = false;
             if (_scrubCommentLines)
             {
+                bool isBlockComment = false;
                 task.ScrubLines("cs", x =>
                 {
                     if (isBlockComment && x.Contains("*/"))
@@ -188,6 +191,20 @@ namespace Minerals.AutoCommands.Tests.Utils
                     else
                     {
                         return x.Replace(" ", "").StartsWith("//");
+                    }
+                });
+            }
+            else if (_scrubVersionInfo)
+            {
+                task.ScrubLinesWithReplace("cs", x =>
+                {
+                    if (x.Replace(" ", "").StartsWith("//Version:"))
+                    {
+                        return "// Version: {Removed}";
+                    }
+                    else
+                    {
+                        return x;
                     }
                 });
             }

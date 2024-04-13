@@ -23,7 +23,7 @@
         <PackageProjectUrl>https://github.com/SzymonHalucha/Minerals.AutoCommands</PackageProjectUrl>
         <PackageTags>attribute, attributes, generator, generation, cli, dotnet, tool, tools, commands</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageReleaseNotes>Changed public api</PackageReleaseNotes>
+        <PackageReleaseNotes>Generator optimization and API changes</PackageReleaseNotes>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
 
@@ -38,8 +38,14 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
         <EnablePackageValidation>true</EnablePackageValidation>
+        <IncludeBuildOutput>true</IncludeBuildOutput>
         <Optimize>true</Optimize>
     </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.*" PrivateAssets="all" />
+        <PackageReference Update="NETStandard.Library" PrivateAssets="all" />
+    </ItemGroup>
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="" />

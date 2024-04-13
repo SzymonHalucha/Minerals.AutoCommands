@@ -1,5 +1,6 @@
 namespace Minerals.AutoCommands
 {
+    //TODO: Wirte Handlers implementation
     public static class CommandPipelineHandlers
     {
         public static void HandleException(Exception exception)

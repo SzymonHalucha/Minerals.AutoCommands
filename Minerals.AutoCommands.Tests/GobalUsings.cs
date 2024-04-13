@@ -12,4 +12,5 @@ global using DiffEngine;
 global using Minerals.AutoCommands.Interfaces;
 global using Minerals.AutoCommands.Exceptions;
 global using Minerals.AutoCommands.Attributes;
+global using Minerals.AutoCommands.Generators;
 global using Minerals.AutoCommands.Tests.Utils;

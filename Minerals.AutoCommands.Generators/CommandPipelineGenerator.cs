@@ -19,7 +19,7 @@ namespace Minerals.AutoCommands.Generators
                 [global::System.Diagnostics.DebuggerNonUserCode]
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
                 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-                public class CommandPipeline : global::Minerals.AutoCommands.Interfaces.ICommandPipeline
+                public sealed class CommandPipeline : global::Minerals.AutoCommands.Interfaces.ICommandPipeline
                 {
                     private readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Action<global::System.Exception>> _exceptionsHandlers = new global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Action<global::System.Exception>>();
 

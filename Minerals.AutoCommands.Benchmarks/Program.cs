@@ -4,7 +4,7 @@ namespace Minerals.AutoCommands.Benchmarks
     {
         public static void Main()
         {
-            BenchmarkRunner.Run<CommandPipelineGeneratorBenchmark>
+            BenchmarkRunner.Run<CommandsGeneratorBenchmarks>
             (
                 DefaultConfig.Instance
                     .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.FastestToSlowest))

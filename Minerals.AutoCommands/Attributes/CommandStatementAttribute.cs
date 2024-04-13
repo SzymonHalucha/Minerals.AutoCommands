@@ -1,8 +1,7 @@
+#pragma warning disable CS9113
 namespace Minerals.AutoCommands.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public class CommandStatementAttribute(params string[] aliases) : Attribute
-    {
-        public string[] Aliases { get; } = aliases;
-    }
+    public sealed class CommandStatementAttribute(params string[] aliases) : Attribute;
 }
+#pragma warning restore CS9113
