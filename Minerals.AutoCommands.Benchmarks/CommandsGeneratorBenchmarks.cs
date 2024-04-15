@@ -3,7 +3,6 @@
     public class CommandsGeneratorBenchmarks
     {
         public BenchmarkGeneration Baseline { get; set; } = default!;
-        public BenchmarkGeneration PipelineGeneration { get; set; } = default!;
         public BenchmarkGeneration FullGeneration { get; set; } = default!;
         public BenchmarkGeneration BaselineDouble { get; set; } = default!;
         public BenchmarkGeneration FullGenerationDouble { get; set; } = default!;
@@ -15,50 +14,56 @@
         {
             public partial class TestCommand1
             {
-                public Type[] RequiredArguments { get; } = [];
-                public Type[] PossibleArguments { get; } = [];
+                public string[] Aliases { get; } = new string[] { "test1" };
+                public Type[] RequiredArguments { get; } = new Type[] { };
+                public Type[] PossibleArguments { get; } = new Type[] { };
                 public string Description { get; } = "";
-                public string Usage { get; } = "";
+                public string Group { get; } = "";
 
-                public void ShowHelp() { }
-                public bool Execute() => true;
+                public bool Execute()
+                {
+                    return true;
+                }
             }
 
-            public partial class TestArgument1
+            public partial class TestValue1
             {
-                public string[] PossibleValues { get; } = [];
+                public string[] Aliases { get; } = new string[] { "--arg1" };
+                public string[] PossibleValues { get; } = new string[] { };
                 public string Description { get; } = "";
-                public string Usage { get; } = "";
+                public string Group { get; } = "";
             }
         }
         """;
 
         private const string _withAttributes = """
         using System;
-        using Minerals.AutoCommands;
-        using Minerals.AutoCommands.Interfaces;
         using Minerals.AutoCommands.Attributes;
 
         namespace Minerals.Examples
         {
-            [CommandStatement("test1")]
+            [CommandStatement]
             public partial class TestCommand1
             {
-                public Type[] RequiredArguments { get; } = [];
-                public Type[] PossibleArguments { get; } = [];
+                public string[] Aliases { get; } = new string[] { "test1" };
+                public Type[] RequiredArguments { get; } = new Type[] { };
+                public Type[] PossibleArguments { get; } = new Type[] { };
                 public string Description { get; } = "";
-                public string Usage { get; } = "";
+                public string Group { get; } = "";
 
-                public void ShowHelp() { }
-                public bool Execute() => true;
+                public bool Execute()
+                {
+                    return true;
+                }
             }
 
-            [CommandArgument("--arg1")]
-            public partial class TestArgument1
+            [CommandValue]
+            public partial class TestValue1
             {
-                public string[] PossibleValues { get; } = [];
+                public string[] Aliases { get; } = new string[] { "--arg1" };
+                public string[] PossibleValues { get; } = new string[] { };
                 public string Description { get; } = "";
-                public string Usage { get; } = "";
+                public string Group { get; } = "";
             }
         }
         """;
@@ -69,7 +74,7 @@
             var references = BenchmarkGenerationExtensions.GetAppReferences
             (
                 typeof(object),
-                typeof(CommandPipelineHandlers),
+                typeof(CommandPipeline),
                 typeof(CommandStatementAttribute),
                 typeof(CommandOrderException),
                 typeof(ICommandStatement),
@@ -80,17 +85,10 @@
                 _withoutAttributes,
                 references
             );
-            PipelineGeneration = BenchmarkGenerationExtensions.CreateGeneration
-            (
-                _withoutAttributes,
-                new CommandPipelineGenerator(),
-                references
-            );
             FullGeneration = BenchmarkGenerationExtensions.CreateGeneration
             (
                 _withAttributes,
                 new CommandsGenerator(),
-                [new CommandPipelineGenerator()],
                 references
             );
             BaselineDouble = BenchmarkGenerationExtensions.CreateGeneration
@@ -102,7 +100,6 @@
             (
                 _withAttributes,
                 new CommandsGenerator(),
-                [new CommandPipelineGenerator()],
                 references
             );
             BaselineDouble.RunAndSaveGeneration();
@@ -115,12 +112,6 @@
         public void SingleGeneration_Baseline()
         {
             Baseline.RunGeneration();
-        }
-
-        [Benchmark]
-        public void SingleGeneration_OnlyPipeline()
-        {
-            PipelineGeneration.RunGeneration();
         }
 
         [Benchmark]

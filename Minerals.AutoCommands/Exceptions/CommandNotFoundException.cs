@@ -1,8 +1,9 @@
 namespace Minerals.AutoCommands.Exceptions
 {
-    public sealed class CommandNotFoundException : CommandExceptionBase
+    public sealed class CommandNotFoundException(ICommandPipeline pipeline, ICommand current, string alias)
+        : CommandExceptionBase(pipeline, current)
     {
-        public CommandNotFoundException() : base(string.Empty) { }
-        public CommandNotFoundException(string message) : base(message) { }
+        public override string Message => $"The command with name '{Alias}' was not found.";
+        public string Alias => alias;
     }
 }

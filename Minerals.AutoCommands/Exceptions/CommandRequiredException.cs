@@ -1,8 +1,9 @@
 namespace Minerals.AutoCommands.Exceptions
 {
-    public sealed class CommandRequiredException : CommandExceptionBase
+    public sealed class CommandRequiredException(ICommandPipeline pipeline, ICommand current, Type type)
+        : CommandExceptionBase(pipeline, current)
     {
-        public CommandRequiredException() : base(string.Empty) { }
-        public CommandRequiredException(string message) : base(message) { }
+        public override string Message => $"The '{Type.Name}' argument type is required.";
+        public Type Type => type;
     }
 }

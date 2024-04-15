@@ -1,8 +1,8 @@
 namespace Minerals.AutoCommands.Exceptions
 {
-    public sealed class CommandValueNotFoundException : CommandExceptionBase
+    public sealed class CommandValueNotFoundException(ICommandPipeline pipeline, ICommand current)
+        : CommandExceptionBase(pipeline, current)
     {
-        public CommandValueNotFoundException() : base(string.Empty) { }
-        public CommandValueNotFoundException(string message) : base(message) { }
+        public override string Message => $"Value for the argument '{Pipeline.GetUsedAlias(Current)}' was not found.";
     }
 }

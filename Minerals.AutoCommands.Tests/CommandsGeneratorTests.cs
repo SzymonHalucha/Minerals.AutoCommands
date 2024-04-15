@@ -8,13 +8,47 @@ namespace Minerals.AutoCommands.Tests
             var references = VerifyExtensions.GetAppReferences
             (
                 typeof(object),
-                typeof(CommandPipelineHandlers),
+                typeof(CommandPipeline),
                 typeof(CommandStatementAttribute),
-                typeof(CommandOrderException),
+                typeof(CommandDuplicateException),
                 typeof(ICommandStatement),
                 typeof(CommandObject)
             );
             VerifyExtensions.Initialize(references);
+        }
+
+        [TestMethod]
+        public Task CommandValueAndStatement_ShouldGenerate()
+        {
+            const string source = """
+            using System;
+            using Minerals.AutoCommands.Interfaces;
+            using Minerals.AutoCommands.Attributes;
+
+            namespace Minerals.Examples
+            {
+                [CommandStatement]
+                public partial class TestCommand1
+                {
+                    public string[] Aliases { get; } = [ "test1" ];
+                    public string Description { get; } = string.Empty;
+                    public Type[] PossibleArguments { get; } = [];
+
+                    public override bool Execute()
+                    {
+                        return true;
+                    }
+                }
+
+                [CommandValue]
+                public partial class TestValue1
+                {
+                    public string[] Aliases { get; } = [ "--arg1" ];
+                    public string Description { get; } = string.Empty;
+                }
+            }
+            """;
+            return this.VerifyIncrementalGenerators(source, new CommandsGenerator());
         }
 
         [TestMethod]
@@ -27,16 +61,17 @@ namespace Minerals.AutoCommands.Tests
 
             namespace Minerals.Examples
             {
-                [CommandStatement("test1")]
+                [CommandStatement]
                 public partial class TestCommand1
                 {
-                    public Type[] RequiredArguments { get; } = [];
+                    public string[] Aliases { get; } = new string[] { "test1" };
+                    public string Description { get; } = string.Empty;
                     public Type[] PossibleArguments { get; } = [];
-                    public string Description { get; } = "";
-                    public string Usage { get; } = "";
 
-                    public void ShowHelp() { }
-                    public bool Execute() => true;
+                    public override bool Execute()
+                    {
+                        return true;
+                    }
                 }
             }
             """;
@@ -44,7 +79,7 @@ namespace Minerals.AutoCommands.Tests
         }
 
         [TestMethod]
-        public Task CommandArgument_ShouldGenerate()
+        public Task CommandValue_ShouldGenerate()
         {
             const string source = """
             using System;
@@ -53,12 +88,95 @@ namespace Minerals.AutoCommands.Tests
 
             namespace Minerals.Examples
             {
-                [CommandArgument("--arg1")]
-                public partial class TestArgument1
+                [CommandValue]
+                public partial class TestValue1
                 {
-                    public string[] PossibleValues { get; } = [];
-                    public string Description { get; } = "";
-                    public string Usage { get; } = "";
+                    public string[] Aliases { get; } = new string[] { "--arg1" };
+                    public string Description { get; } = string.Empty;
+                }
+            }
+            """;
+            return this.VerifyIncrementalGenerators(source, new CommandsGenerator());
+        }
+
+        [TestMethod]
+        public Task CommandValue_ShouldGenerateExpressionCollection()
+        {
+            const string source = """
+            using System;
+            using Minerals.AutoCommands.Interfaces;
+            using Minerals.AutoCommands.Attributes;
+
+            namespace Minerals.Examples
+            {
+                [CommandValue]
+                public partial class TestValue1
+                {
+                    public string[] Aliases => [ "--arg1" ];
+                    public string Description { get; } = string.Empty;
+                }
+            }
+            """;
+            return this.VerifyIncrementalGenerators(source, new CommandsGenerator());
+        }
+
+        [TestMethod]
+        public Task CommandValue_ShouldGenerateGetCollection()
+        {
+            const string source = """
+            using System;
+            using Minerals.AutoCommands.Interfaces;
+            using Minerals.AutoCommands.Attributes;
+
+            namespace Minerals.Examples
+            {
+                [CommandValue]
+                public partial class TestValue1
+                {
+                    public string[] Aliases { get; } = [ "--arg1" ];
+                    public string Description { get; } = string.Empty;
+                }
+            }
+            """;
+            return this.VerifyIncrementalGenerators(source, new CommandsGenerator());
+        }
+
+        [TestMethod]
+        public Task CommandValue_ShouldGenerateExpressionArray()
+        {
+            const string source = """
+            using System;
+            using Minerals.AutoCommands.Interfaces;
+            using Minerals.AutoCommands.Attributes;
+
+            namespace Minerals.Examples
+            {
+                [CommandValue]
+                public partial class TestValue1
+                {
+                    public string[] Aliases => new string[] { "--arg1" };
+                    public string Description { get; } = string.Empty;
+                }
+            }
+            """;
+            return this.VerifyIncrementalGenerators(source, new CommandsGenerator());
+        }
+
+        [TestMethod]
+        public Task CommandValue_ShouldGenerateGetArray()
+        {
+            const string source = """
+            using System;
+            using Minerals.AutoCommands.Interfaces;
+            using Minerals.AutoCommands.Attributes;
+
+            namespace Minerals.Examples
+            {
+                [CommandValue]
+                public partial class TestValue1
+                {
+                    public string[] Aliases { get; } = new string[] { "--arg1" };
+                    public string Description { get; } = string.Empty;
                 }
             }
             """;
@@ -66,59 +184,3 @@ namespace Minerals.AutoCommands.Tests
         }
     }
 }
-
-// namespace Minerals.Examples
-// {
-//     public static class Program
-//     {
-//         public static void Main()
-//         {
-//             string[] args = ["test1", "--arg1", "value1"];
-//             var pipeline = new CommandPipeline();
-//             var command = pipeline.Evaluate(args, StringComparison.Ordinal);
-//             if (command is ICommandStatement statement)
-//             {
-//                 statement.Execute();
-//             }
-//         }
-//     }
-
-//     [CommandStatement("test1")]
-//     public partial class TestCommand1
-//     {
-//         public Type[] RequiredArguments { get; } = [];
-//         public Type[] PossibleArguments { get; } = [typeof(TestArgument1)];
-//         public string Description { get; } = "";
-//         public string Usage { get; } = "";
-
-//         public void ShowHelp()
-//         {
-//             Console.WriteLine($"{GetType().Name}: Help");
-//         }
-
-//         public bool Execute()
-//         {
-//             Console.WriteLine($"{GetType().Name}: Executed");
-//             foreach (var item in Arguments)
-//             {
-//                 if (item is ICommandArgument arg)
-//                 {
-//                     Console.WriteLine($"{arg.GetType().Name}: {arg.Value}");
-//                 }
-//                 else if (item is ICommandStatement statement)
-//                 {
-//                     statement.Execute();
-//                 }
-//             }
-//             return true;
-//         }
-//     }
-
-//     [CommandArgument("--arg1")]
-//     public partial class TestArgument1
-//     {
-//         public string[] PossibleValues { get; } = [];
-//         public string Description { get; } = "";
-//         public string Usage { get; } = "";
-//     }
-// }

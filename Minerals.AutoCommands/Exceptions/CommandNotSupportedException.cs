@@ -1,8 +1,9 @@
 namespace Minerals.AutoCommands.Exceptions
 {
-    public sealed class CommandNotSupportedException : CommandExceptionBase
+    public sealed class CommandNotSupportedException(ICommandPipeline pipeline, ICommand current, ICommand next)
+        : CommandExceptionBase(pipeline, current)
     {
-        public CommandNotSupportedException() : base(string.Empty) { }
-        public CommandNotSupportedException(string message) : base(message) { }
+        public override string Message => $"The argument named '{Pipeline.GetUsedAlias(Next)}' is not valid for the command named '{Pipeline.GetUsedAlias(Current)}'.";
+        public ICommand Next => next;
     }
 }

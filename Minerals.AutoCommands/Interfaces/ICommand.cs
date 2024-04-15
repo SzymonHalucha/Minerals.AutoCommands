@@ -2,10 +2,15 @@ namespace Minerals.AutoCommands.Interfaces
 {
     public interface ICommand
     {
+        public string[] Aliases { get; }
         public string Description { get; }
-        public string Usage { get; }
+        public string Group { get; }
 
-        public ICommandStatement? Parent { get; set; }
-        public bool Evaluate(string[] args, int index, StringComparison comparison);
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ICommand? Parent { get; set; }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool Evaluate(ICommandPipeline pipeline, string[] args, int index);
+        public string GetHelp();
     }
 }

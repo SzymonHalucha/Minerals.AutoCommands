@@ -1,8 +1,9 @@
 namespace Minerals.AutoCommands.Exceptions
 {
-    public sealed class CommandValueException : CommandExceptionBase
+    public sealed class CommandValueException(ICommandPipeline pipeline, ICommand current, string value)
+        : CommandExceptionBase(pipeline, current)
     {
-        public CommandValueException() : base(string.Empty) { }
-        public CommandValueException(string message) : base(message) { }
+        public override string Message => $"The value '{Value}' is not valid for the argument '{Pipeline.GetUsedAlias(Current)}'.";
+        public string Value = value;
     }
 }

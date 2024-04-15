@@ -1,6 +1,6 @@
 namespace Minerals.AutoCommands.Generators
 {
-    public static class CommandStatementGenerator
+    public static class CommandValueGenerator
     {
         public static SourceText AppendPartialClass(CommandObject cmdObj)
         {
@@ -13,12 +13,12 @@ namespace Minerals.AutoCommands.Generators
             AppendPartialClass(builder, cmdObj);
 
             AppendParentProperty(builder);
-            AppendArgumentsProperty(builder);
+            AppendValueProperty(builder);
 
             AppendGetHelpMethod(builder);
             AppendEvaluateMethod(builder);
+            AppendGetCommandValueMethod(builder);
             AppendGetNextCommandMethod(builder);
-            AppendCheckRequiredArgumentsMethod(builder);
 
             builder.CloseAllBlocks();
 
@@ -43,7 +43,7 @@ namespace Minerals.AutoCommands.Generators
             });
             builder.Write("class ")
                 .Write(cmdObj.Name)
-                .Write(" : global::Minerals.AutoCommands.Interfaces.ICommandStatement")
+                .Write(" : global::Minerals.AutoCommands.Interfaces.ICommandValue")
                 .OpenBlock();
         }
 
@@ -74,19 +74,19 @@ namespace Minerals.AutoCommands.Generators
             """);
         }
 
-        private static void AppendArgumentsProperty(CodeBuilder builder)
+        private static void AppendValueProperty(CodeBuilder builder)
         {
-            builder.NewLine().WriteLine(@"public global::System.Collections.Generic.List<global::Minerals.AutoCommands.Interfaces.ICommand> Arguments { get; protected set; } = new global::System.Collections.Generic.List<global::Minerals.AutoCommands.Interfaces.ICommand>();");
+            builder.NewLine().WriteLine(@"public string Value { get; private set; } = string.Empty;");
         }
 
-        //TODO: Write Command Statement Help
+        //TODO: Write Command Value Help
         private static void AppendGetHelpMethod(CodeBuilder builder)
         {
             builder.NewLine().WriteBlock("""
 
             public string GetHelp()
             {
-                return "Statement Help";
+                return "Value Help";
             }
             """);
         }
@@ -97,14 +97,33 @@ namespace Minerals.AutoCommands.Generators
 
             public bool Evaluate(global::Minerals.AutoCommands.Interfaces.ICommandPipeline pipeline, string[] args, int index)
             {
-                if (index >= args.Length)
+                Value = GetCommandValue(pipeline, args, index);
+                if (++index >= args.Length)
                 {
                     return true;
                 }
                 var next = GetNextCommand(pipeline, args, index);
-                next.Parent = this;
-                next.Evaluate(pipeline, args, ++index);
-                return CheckRequiredArguments(pipeline);
+                next.Parent = Parent;
+                return next.Evaluate(pipeline, args, ++index);
+            }
+            """);
+        }
+
+        private static void AppendGetCommandValueMethod(CodeBuilder builder)
+        {
+            builder.NewLine().WriteBlock("""
+            
+            private string GetCommandValue(global::Minerals.AutoCommands.Interfaces.ICommandPipeline pipeline, string[] args, int index)
+            {
+                if (index >= args.Length)
+                {
+                    throw new global::Minerals.AutoCommands.Exceptions.CommandValueNotFoundException(pipeline, this);
+                }
+                if (!PossibleValues.Contains(args[index]) && PossibleValues.Length > 0)
+                {
+                    throw new global::Minerals.AutoCommands.Exceptions.CommandValueException(pipeline, this, args[index]);
+                }
+                return args[index];
             }
             """);
         }
@@ -120,33 +139,19 @@ namespace Minerals.AutoCommands.Generators
                 {
                     throw new global::Minerals.AutoCommands.Exceptions.CommandNotFoundException(pipeline, this, args[index]);
                 }
-                if (!PossibleArguments.Contains(next.GetType()))
+                if (next is global::Minerals.AutoCommands.Interfaces.ICommandStatement)
+                {
+                    throw new global::Minerals.AutoCommands.Exceptions.CommandOrderException(pipeline, this, next);
+                }
+                if (!(Parent as global::Minerals.AutoCommands.Interfaces.ICommandStatement).PossibleArguments.Contains(next.GetType()))
                 {
                     throw new global::Minerals.AutoCommands.Exceptions.CommandNotSupportedException(pipeline, this, next);
                 }
-                if (Arguments.Any(x => x.GetType() == next.GetType()))
+                if ((Parent as global::Minerals.AutoCommands.Interfaces.ICommandStatement).Arguments.Any(x => x.GetType() == next.GetType()))
                 {
                     throw new global::Minerals.AutoCommands.Exceptions.CommandDuplicateException(pipeline, this, next);
                 }
                 return next;
-            }
-            """);
-        }
-
-        private static void AppendCheckRequiredArgumentsMethod(CodeBuilder builder)
-        {
-            builder.NewLine().WriteBlock("""
-
-            private bool CheckRequiredArguments(global::Minerals.AutoCommands.Interfaces.ICommandPipeline pipeline)
-            {
-                foreach (var arg in RequiredArguments)
-                {
-                    if (!Arguments.Any(x => x.GetType() == arg))
-                    {
-                        throw new global::Minerals.AutoCommands.Exceptions.CommandRequiredException(pipeline, this, arg);
-                    }
-                }
-                return true;
             }
             """);
         }

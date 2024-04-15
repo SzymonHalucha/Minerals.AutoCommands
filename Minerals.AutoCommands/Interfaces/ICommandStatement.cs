@@ -8,6 +8,5 @@ namespace Minerals.AutoCommands.Interfaces
         public List<ICommand> Arguments { get; }
 
         public bool Execute();
-        public void ShowHelp();
     }
 }

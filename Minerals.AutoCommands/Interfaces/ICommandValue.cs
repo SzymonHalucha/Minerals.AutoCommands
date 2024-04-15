@@ -1,9 +1,8 @@
 namespace Minerals.AutoCommands.Interfaces
 {
-    public interface ICommandArgument : ICommand
+    public interface ICommandValue : ICommand
     {
         public string[] PossibleValues { get; }
-
-        public string Value { get; set; }
+        public string Value { get; }
     }
 }

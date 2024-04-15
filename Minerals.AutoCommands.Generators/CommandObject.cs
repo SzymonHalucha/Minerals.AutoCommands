@@ -54,8 +54,23 @@ namespace Minerals.AutoCommands.Generators
 
         private string[] GetAliasesOf(GeneratorAttributeSyntaxContext context)
         {
-            var types = context.Attributes.SelectMany(x => x.ConstructorArguments.SelectMany(y => y.Values));
-            return types.Select(x => x.Value?.ToString() ?? string.Empty).ToArray();
+            var syntax = ((TypeDeclarationSyntax)context.TargetNode).Members
+                .OfType<PropertyDeclarationSyntax>()
+                .First(x => x.Identifier.ValueText.Equals("Aliases", StringComparison.Ordinal));
+
+            IEnumerable<string> aliases = [];
+            ExpressionSyntax? expression = syntax.ExpressionBody?.Expression ?? syntax.Initializer?.Value;
+
+            if (expression is ArrayCreationExpressionSyntax array)
+            {
+                aliases = array.Initializer!.Expressions.Select(x => ((LiteralExpressionSyntax)x).Token.ValueText);
+            }
+            else if (expression is CollectionExpressionSyntax collection)
+            {
+                aliases = collection.Elements.Select(x => ((LiteralExpressionSyntax)((ExpressionElementSyntax)x).Expression).Token.ValueText);
+            }
+
+            return aliases.ToArray();
         }
     }
 }
