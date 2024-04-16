@@ -7,63 +7,53 @@
         public BenchmarkGeneration BaselineDouble { get; set; } = default!;
         public BenchmarkGeneration FullGenerationDouble { get; set; } = default!;
 
-        private const string _withoutAttributes = """
+        private const string _withoutBaseClass = """
         using System;
 
         namespace Minerals.Examples
         {
-            public partial class TestCommand1
+            public class TestCommand1
             {
-                public string[] Aliases { get; } = new string[] { "test1" };
-                public Type[] RequiredArguments { get; } = new Type[] { };
-                public Type[] PossibleArguments { get; } = new Type[] { };
-                public string Description { get; } = "";
-                public string Group { get; } = "";
+                public string[] Aliases { get; } = ["test1"];
+                public string Description { get; } = "Lorem ipsum sit dolor amet 1";
+                public Type[] PossibleArguments { get; } = [typeof(TestCommand2)];
 
-                public bool Execute()
-                {
-                    return true;
-                }
+                public void Execute() { }
             }
 
-            public partial class TestValue1
+            public class TestCommand2
             {
-                public string[] Aliases { get; } = new string[] { "--arg1" };
-                public string[] PossibleValues { get; } = new string[] { };
-                public string Description { get; } = "";
-                public string Group { get; } = "";
+                public string[] Aliases { get; } = ["test2"];
+                public string Description { get; } = "Lorem ipsum sit dolor amet 2";
+                public Type[] PossibleArguments { get; } = [typeof(TestCommand1)];
+
+                public void Execute() { }
             }
         }
         """;
 
-        private const string _withAttributes = """
+        private const string _withBaseClass = """
         using System;
-        using Minerals.AutoCommands.Attributes;
+        using Minerals.AutoCommands;
 
         namespace Minerals.Examples
         {
-            [CommandStatement]
-            public partial class TestCommand1
+            public class TestCommand1 : CommandStatement
             {
-                public string[] Aliases { get; } = new string[] { "test1" };
-                public Type[] RequiredArguments { get; } = new Type[] { };
-                public Type[] PossibleArguments { get; } = new Type[] { };
-                public string Description { get; } = "";
-                public string Group { get; } = "";
+                public override string[] Aliases { get; } = ["test1"];
+                public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
+                public override Type[] PossibleArguments { get; } = [typeof(TestCommand2)];
 
-                public bool Execute()
-                {
-                    return true;
-                }
+                public override void Execute() { }
             }
 
-            [CommandValue]
-            public partial class TestValue1
+            public class TestCommand2 : CommandStatement
             {
-                public string[] Aliases { get; } = new string[] { "--arg1" };
-                public string[] PossibleValues { get; } = new string[] { };
-                public string Description { get; } = "";
-                public string Group { get; } = "";
+                public override string[] Aliases { get; } = ["test2"];
+                public override string Description { get; } = "Lorem ipsum sit dolor amet 2";
+                public override Type[] PossibleArguments { get; } = [typeof(TestCommand1)];
+
+                public override void Execute() { }
             }
         }
         """;
@@ -75,31 +65,30 @@
             (
                 typeof(object),
                 typeof(CommandPipeline),
-                typeof(CommandStatementAttribute),
-                typeof(CommandOrderException),
+                typeof(CommandException),
                 typeof(ICommandStatement),
-                typeof(CommandObject)
+                typeof(CommandStatementObject)
             );
             Baseline = BenchmarkGenerationExtensions.CreateGeneration
             (
-                _withoutAttributes,
+                _withoutBaseClass,
                 references
             );
             FullGeneration = BenchmarkGenerationExtensions.CreateGeneration
             (
-                _withAttributes,
-                new CommandsGenerator(),
+                _withBaseClass,
+                new CommandParserGenerator(),
                 references
             );
             BaselineDouble = BenchmarkGenerationExtensions.CreateGeneration
             (
-                _withoutAttributes,
+                _withoutBaseClass,
                 references
             );
             FullGenerationDouble = BenchmarkGenerationExtensions.CreateGeneration
             (
-                _withAttributes,
-                new CommandsGenerator(),
+                _withBaseClass,
+                new CommandParserGenerator(),
                 references
             );
             BaselineDouble.RunAndSaveGeneration();

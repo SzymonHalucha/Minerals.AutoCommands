@@ -2,6 +2,7 @@ namespace Minerals.AutoCommands.Interfaces
 {
     public interface ICommandParser
     {
-        public ICommand Parse(string arg, StringComparison comparison);
+        public ICommandStatement Parse(string arg, StringComparison comparison);
+        public bool IsAlias(string text, StringComparison comparison);
     }
 }

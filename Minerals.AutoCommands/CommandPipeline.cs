@@ -2,25 +2,30 @@ namespace Minerals.AutoCommands
 {
     public sealed class CommandPipeline : ICommandPipeline
     {
-        public string Title { get; private set; }
-        public string Version { get; private set; }
-        public string MainCommand { get; private set; }
+        public string Title { get; }
+        public string Version { get; }
+        public string MainCommand { get; }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ICommandWriter Writer { get; private set; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ICommandParser Parser { get; private set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public StringComparison Comparison { get; private set; }
 
         private string[] Args { get; set; }
         private Dictionary<Type, Action<Exception>> ExceptionHandlers { get; set; }
 
-        public CommandPipeline(string title, string version, string mainCommand, StringComparison comparison = StringComparison.Ordinal)
+        public CommandPipeline(string title, string version, string mainCommand)
         {
             Title = title;
             Version = version;
             MainCommand = mainCommand;
-            Comparison = comparison;
+            Writer = new CommandWriter();
             Parser = null!;
+            Comparison = StringComparison.Ordinal;
             Args = [];
             ExceptionHandlers = [];
         }
@@ -37,14 +42,26 @@ namespace Minerals.AutoCommands
             return this;
         }
 
-        public ICommandStatement? Evaluate(string[] args)
+        public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new()
+        {
+            Writer = new T();
+            return this;
+        }
+
+        public ICommandPipeline UseStringComparison(StringComparison comparison)
+        {
+            Comparison = comparison;
+            return this;
+        }
+
+        public ICommandStatement Evaluate(string[] args)
         {
             try
             {
                 Args = args;
                 var command = Parser.Parse(args[0], Comparison);
-                command?.Evaluate(this, args, 1);
-                return command as ICommandStatement;
+                command.Evaluate(this, args, 1);
+                return command;
             }
             catch (Exception exception)
             {
@@ -60,11 +77,17 @@ namespace Minerals.AutoCommands
                     }
                 }
             }
-            return null;
+            return null!;
+        }
+
+        //TODO: Write Tool Help
+        public void DisplayHelp()
+        {
+            Writer.WriteInfo($"{GetType().Name}: Pipeline Help");
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public string GetUsedAlias(ICommand command)
+        public string GetUsedAlias(ICommandStatement command)
         {
             return Args.FirstOrDefault(x =>
             {
@@ -75,15 +98,9 @@ namespace Minerals.AutoCommands
             }) ?? string.Empty;
         }
 
-        //TODO: Write Tool Help
-        public void Help()
-        {
-            Console.WriteLine($"{GetType().Name}: Pipeline Help");
-        }
-
         private bool HandleCommandException(Exception exception)
         {
-            if (exception is CommandExceptionBase cmdException)
+            if (exception is CommandException cmdException)
             {
                 if (cmdException is CommandDuplicateException or CommandValueNotFoundException or CommandNotFoundException)
                 {
@@ -101,37 +118,37 @@ namespace Minerals.AutoCommands
             return true;
         }
 
-        private void ShowHelpForCommand(CommandExceptionBase exception)
+        private void ShowHelpForCommand(CommandException exception)
         {
             ShowErrorAndUsage(exception);
-            Console.WriteLine($"Use '{MainCommand}{GetNestedParentHelp(exception.Current)} --help' to get more information about this command.");
-            Console.WriteLine();
+            Writer.WriteInfo($"Use '{MainCommand}{GetNestedParentHelp(exception.Current)} --help' to get more information about this command.");
+            Writer.WriteInfo("");
         }
 
-        private string GetNestedParentHelp(ICommand? command, string text = "")
+        private string GetNestedParentHelp(ICommandStatement? command, string text = "")
         {
             if (command != null)
             {
-                text = $"{text} {GetUsedAlias(command)}";
+                text = $" {GetUsedAlias(command)}{text}";
                 return GetNestedParentHelp(command.Parent, text);
             }
             return text;
         }
 
-        private void ShowHelpForTool(CommandExceptionBase exception)
+        private void ShowHelpForTool(CommandException exception)
         {
             ShowErrorAndUsage(exception);
-            Console.WriteLine($"Use '{MainCommand} --help' to get more information about this tool.");
-            Console.WriteLine();
+            Writer.WriteInfo($"Use '{MainCommand} --help' to get more information about this tool.");
+            Writer.WriteInfo("");
         }
 
-        private void ShowErrorAndUsage(CommandExceptionBase exception)
+        private void ShowErrorAndUsage(CommandException exception)
         {
-            Console.WriteLine($"ERROR: {exception.Message}");
-            Console.WriteLine($"{Title} {Version}");
-            Console.WriteLine();
-            Console.WriteLine($"USAGE: {MainCommand} [Command] [Options] [Arguments]");
-            Console.WriteLine();
+            Writer.WriteError($"ERROR: {exception.Message}");
+            Writer.WriteInfo($"{Title} {Version}");
+            Writer.WriteInfo("");
+            Writer.WriteInfo($"USAGE: {MainCommand} [Command] [Options] [Arguments]");
+            Writer.WriteInfo("");
         }
     }
 }

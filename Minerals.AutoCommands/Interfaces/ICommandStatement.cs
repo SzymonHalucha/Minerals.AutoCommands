@@ -1,12 +1,22 @@
 namespace Minerals.AutoCommands.Interfaces
 {
-    public interface ICommandStatement : ICommand
+    public interface ICommandStatement
     {
-        public Type[] RequiredArguments { get; }
+        public string[] Aliases { get; }
+        public string Description { get; }
+        public string Group { get; }
+        public bool RequireValue { get; }
+
         public Type[] PossibleArguments { get; }
+        public Type[] RequireArguments { get; }
+        public List<ICommandStatement> Arguments { get; }
 
-        public List<ICommand> Arguments { get; }
+        public string? Value { get; }
+        public ICommandStatement? Parent { get; set; }
+        public ICommandWriter? Writer { get; set; }
 
-        public bool Execute();
+        public void Execute();
+        public void Evaluate(ICommandPipeline pipeline, string[] args, int index);
+        public void DisplayHelp();
     }
 }

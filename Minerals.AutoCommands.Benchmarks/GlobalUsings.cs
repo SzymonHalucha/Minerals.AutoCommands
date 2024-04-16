@@ -13,7 +13,6 @@ global using BenchmarkDotNet.Validators;
 global using BenchmarkDotNet.Diagnosers;
 global using BenchmarkDotNet.Environments;
 global using Minerals.AutoCommands.Interfaces;
-global using Minerals.AutoCommands.Attributes;
 global using Minerals.AutoCommands.Exceptions;
 global using Minerals.AutoCommands.Generators;
 global using Minerals.AutoCommands.Benchmarks.Utils;
