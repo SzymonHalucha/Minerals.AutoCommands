@@ -6,6 +6,7 @@ global using System.Collections.Generic;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.CSharp;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using NSubstitute.Extensions;
 global using VerifyMSTest;
 global using VerifyTests;
 global using NSubstitute;

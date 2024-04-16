@@ -17,7 +17,9 @@ namespace Minerals.AutoCommands.Interfaces
 
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new();
         public ICommandPipeline UseCommandParser<T>() where T : ICommandParser, new();
+        public ICommandPipeline UseCommandParser(ICommandParser parser);
         public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new();
+        public ICommandPipeline UseCommandWriter(ICommandWriter writer);
         public ICommandPipeline UseStringComparison(StringComparison comparison);
         public ICommandStatement Evaluate(string[] args);
         public void DisplayHelp();

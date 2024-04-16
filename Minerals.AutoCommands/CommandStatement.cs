@@ -108,7 +108,7 @@ namespace Minerals.AutoCommands
             {
                 throw new CommandNotSupportedException(pipeline, this, next);
             }
-            if (Arguments.Any(x => x.GetType() == next.GetType()))
+            if (CheckCommandDuplicate(next))
             {
                 throw new CommandDuplicateException(pipeline, this, next);
             }
@@ -125,6 +125,22 @@ namespace Minerals.AutoCommands
                     throw new CommandRequiredException(pipeline, this, arg);
                 }
             }
+        }
+
+        protected bool CheckCommandDuplicate(ICommandStatement next)
+        {
+            ICommandStatement? current = this;
+            List<ICommandStatement> parents = [];
+            while (current != null)
+            {
+                parents.Add(current);
+                current = current.Parent;
+            }
+            if (parents.SelectMany(x => x.Arguments).Any(y => y.GetType() == next.GetType()))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

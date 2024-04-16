@@ -42,9 +42,21 @@ namespace Minerals.AutoCommands
             return this;
         }
 
+        public ICommandPipeline UseCommandParser(ICommandParser parser)
+        {
+            Parser = parser;
+            return this;
+        }
+
         public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new()
         {
             Writer = new T();
+            return this;
+        }
+
+        public ICommandPipeline UseCommandWriter(ICommandWriter writer)
+        {
+            Writer = writer;
             return this;
         }
 
