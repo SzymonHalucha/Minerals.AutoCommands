@@ -15,19 +15,29 @@
             public class TestCommand1
             {
                 public string[] Aliases { get; } = ["test1"];
-                public string Description { get; } = "Lorem ipsum sit dolor amet 1";
+                public string Description { get; } = "Example Description 1.";
                 public Type[] PossibleArguments { get; } = [typeof(TestCommand2)];
 
-                public void Execute() { }
+                public bool Execute(Dictionary<object, object>? data = null)
+                {
+                    Writer.WriteInfo($"{GetType().Name} Execute: {Value}");
+                    Next?.Execute();
+                    return true;
+                }
             }
 
             public class TestCommand2
             {
                 public string[] Aliases { get; } = ["test2"];
-                public string Description { get; } = "Lorem ipsum sit dolor amet 2";
+                public string Description { get; } = "Example Description 2.";
                 public Type[] PossibleArguments { get; } = [typeof(TestCommand1)];
 
-                public void Execute() { }
+                public bool Execute(Dictionary<object, object>? data = null)
+                {
+                    Writer.WriteInfo($"{GetType().Name} Execute: {Value}");
+                    Next?.Execute();
+                    return true;
+                }
             }
         }
         """;
@@ -41,19 +51,29 @@
             public class TestCommand1 : CommandStatement
             {
                 public override string[] Aliases { get; } = ["test1"];
-                public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
+                public override string Description { get; } = "Example Description 1.";
                 public override Type[] PossibleArguments { get; } = [typeof(TestCommand2)];
 
-                public override void Execute() { }
+                public override bool Execute(Dictionary<object, object>? data = null)
+                {
+                    Writer.WriteInfo($"{GetType().Name} Execute: {Value}");
+                    Next?.Execute();
+                    return true;
+                }
             }
 
             public class TestCommand2 : CommandStatement
             {
                 public override string[] Aliases { get; } = ["test2"];
-                public override string Description { get; } = "Lorem ipsum sit dolor amet 2";
+                public override string Description { get; } = "Example Description 2.";
                 public override Type[] PossibleArguments { get; } = [typeof(TestCommand1)];
 
-                public override void Execute() { }
+                public override bool Execute(Dictionary<object, object>? data = null)
+                {
+                    Writer.WriteInfo($"{GetType().Name} Execute: {Value}");
+                    Next?.Execute();
+                    return true;
+                }
             }
         }
         """;

@@ -4,19 +4,6 @@ namespace Minerals.AutoCommands.Tests
     public class CommandStatementTests : VerifyBase
     {
         [TestMethod]
-        public void SingleCommandStatement_ShouldExecuteAll()
-        {
-            var writer = Substitute.For<ICommandWriter>();
-
-            new TestCommandHelpers.TestCommand1 { Writer = writer }.Execute();
-
-            writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(1).WriteInfo("TestCommand1 Executed");
-            writer.DidNotReceive().WriteWarning(Arg.Any<string>());
-            writer.DidNotReceive().WriteError(Arg.Any<string>());
-        }
-
-        [TestMethod]
         public void SingleCommandPipeline_ShouldExecuteAll()
         {
             var writer = Substitute.For<ICommandWriter>();
@@ -25,11 +12,11 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
-                .Evaluate(["test1"])
+                .Evaluate(["test1"])?
                 .Execute();
 
             writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(1).WriteInfo("TestCommand1 Executed");
+            writer.Received(1).WriteInfo("TestCommand1 Execute: ");
             writer.DidNotReceive().WriteWarning(Arg.Any<string>());
             writer.DidNotReceive().WriteError(Arg.Any<string>());
         }
@@ -43,7 +30,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
-                .Evaluate(["test1", "test2", "test3"])
+                .Evaluate(["test1", "test2", "test3"])?
                 .Execute();
 
             writer.DidNotReceive().WriteDebug(Arg.Any<string>());
@@ -52,9 +39,9 @@ namespace Minerals.AutoCommands.Tests
             writer.DidNotReceive().WriteError(Arg.Any<string>());
             Received.InOrder(() =>
             {
-                writer.WriteInfo("TestCommand1 Executed");
-                writer.WriteInfo("TestCommand2 Executed");
-                writer.WriteInfo("TestCommand3 Executed");
+                writer.WriteInfo("TestCommand1 Execute: ");
+                writer.WriteInfo("TestCommand2 Execute: ");
+                writer.WriteInfo("TestCommand3 Execute: ");
             });
         }
 
@@ -67,11 +54,11 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
-                .Evaluate(["test4", "value1"])
+                .Evaluate(["test4", "value1"])?
                 .Execute();
 
             writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(1).WriteInfo("TestCommand4 Executed: value1");
+            writer.Received(1).WriteInfo("TestCommand4 Execute: value1");
             writer.DidNotReceive().WriteWarning(Arg.Any<string>());
             writer.DidNotReceive().WriteError(Arg.Any<string>());
         }
@@ -99,7 +86,7 @@ namespace Minerals.AutoCommands.Tests
                 writer.WriteInfo("");
                 writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
                 writer.WriteInfo("");
-                writer.WriteInfo("Use 'test --help' to get more information about this tool.");
+                writer.WriteInfo("Use 'test test4 --help' to get more information about this command.");
                 writer.WriteInfo("");
             });
         }
@@ -113,7 +100,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
-                .Evaluate(["test2", "test1"])?
+                .Evaluate(["test2", "test2"])?
                 .Execute();
 
             writer.DidNotReceive().WriteDebug(Arg.Any<string>());
@@ -122,7 +109,7 @@ namespace Minerals.AutoCommands.Tests
             writer.Received(1).WriteError(Arg.Any<string>());
             Received.InOrder(() =>
             {
-                writer.WriteError("ERROR: The argument named 'test1' is not valid for the command named 'test2'.");
+                writer.WriteError("ERROR: The argument named 'test2' is not valid for the command named 'test2'.");
                 writer.WriteInfo("Test 1.0.0");
                 writer.WriteInfo("");
                 writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
@@ -150,12 +137,12 @@ namespace Minerals.AutoCommands.Tests
             writer.Received(1).WriteError(Arg.Any<string>());
             Received.InOrder(() =>
             {
-                writer.WriteError("ERROR: The command with name 'test5' was not found.");
+                writer.WriteError("ERROR: The command argument with name 'test5' was not found.");
                 writer.WriteInfo("Test 1.0.0");
                 writer.WriteInfo("");
                 writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
                 writer.WriteInfo("");
-                writer.WriteInfo("Use 'test --help' to get more information about this tool.");
+                writer.WriteInfo("Use 'test test1 --help' to get more information about this command.");
                 writer.WriteInfo("");
             });
         }

@@ -8,7 +8,7 @@ namespace Minerals.AutoCommands.Tests
             var references = VerifyExtensions.GetAppReferences
             (
                 typeof(object),
-                typeof(CommandDuplicateException),
+                typeof(CommandException),
                 typeof(ICommandStatement),
                 typeof(CommandPipeline),
                 typeof(CommandStatementObject)
@@ -31,7 +31,7 @@ namespace Minerals.AutoCommands.Tests
                     public string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public Type[] PossibleArguments { get; } = [];
 
-                    public void Execute() { }
+                    public bool Execute() => true;
                 }
             }
             """;
@@ -53,7 +53,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;
@@ -75,7 +75,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;
@@ -97,7 +97,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;
@@ -119,7 +119,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;
@@ -141,7 +141,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;
@@ -163,7 +163,7 @@ namespace Minerals.AutoCommands.Tests
                     public override string Description { get; } = "Lorem ipsum sit dolor amet 1";
                     public override Type[] PossibleArguments { get; } = [];
 
-                    public override void Execute() { }
+                    public override bool Execute() => true;
                 }
             }
             """;

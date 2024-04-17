@@ -11,7 +11,6 @@ global using VerifyMSTest;
 global using VerifyTests;
 global using NSubstitute;
 global using DiffEngine;
-global using Minerals.AutoCommands;
 global using Minerals.AutoCommands.Interfaces;
 global using Minerals.AutoCommands.Exceptions;
 global using Minerals.AutoCommands.Generators;

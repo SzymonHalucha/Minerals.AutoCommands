@@ -7,10 +7,10 @@ namespace Minerals.AutoCommands.Interfaces
         public string MainCommand { get; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ICommandWriter Writer { get; }
+        public ICommandParser Parser { get; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ICommandParser Parser { get; }
+        public ICommandWriter Writer { get; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public StringComparison Comparison { get; }
@@ -20,11 +20,16 @@ namespace Minerals.AutoCommands.Interfaces
         public ICommandPipeline UseCommandParser(ICommandParser parser);
         public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new();
         public ICommandPipeline UseCommandWriter(ICommandWriter writer);
+        public ICommandPipeline UseCommandHelpAliases(string[] aliases);
         public ICommandPipeline UseStringComparison(StringComparison comparison);
-        public ICommandStatement Evaluate(string[] args);
-        public void DisplayHelp();
+        public ICommandPipeline DisplayCommandList();
+
+        public ICommandStatement? Evaluate(string[] args);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public string GetUsedAlias(ICommandStatement command);
+        public string GetUsedCommandAlias(ICommandStatement? command);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CheckCommandHelp(string[] args, int index);
     }
 }

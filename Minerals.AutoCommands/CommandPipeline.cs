@@ -1,38 +1,27 @@
 namespace Minerals.AutoCommands
 {
-    public sealed class CommandPipeline : ICommandPipeline
+    public sealed class CommandPipeline(string title, string version, string mainCommand) : ICommandPipeline
     {
-        public string Title { get; }
-        public string Version { get; }
-        public string MainCommand { get; }
+        public string Title { get; } = title;
+        public string Version { get; } = version;
+        public string MainCommand { get; } = mainCommand;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ICommandWriter Writer { get; private set; }
+        public ICommandParser Parser { get; private set; } = null!;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ICommandParser Parser { get; private set; }
+        public ICommandWriter Writer { get; private set; } = new CommandWriter();
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public StringComparison Comparison { get; private set; }
+        public StringComparison Comparison { get; private set; } = StringComparison.Ordinal;
 
-        private string[] Args { get; set; }
-        private Dictionary<Type, Action<Exception>> ExceptionHandlers { get; set; }
-
-        public CommandPipeline(string title, string version, string mainCommand)
-        {
-            Title = title;
-            Version = version;
-            MainCommand = mainCommand;
-            Writer = new CommandWriter();
-            Parser = null!;
-            Comparison = StringComparison.Ordinal;
-            Args = [];
-            ExceptionHandlers = [];
-        }
+        private string[] _args = [];
+        private string[] _helpAliases = ["-h1", "--help1"]; //TODO: Change this to normal
+        private readonly Dictionary<Type, Action<Exception>> _handlers = [];
 
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new()
         {
-            ExceptionHandlers.Add(typeof(T), x => handler((T)x));
+            _handlers.Add(typeof(T), x => handler((T)x));
             return this;
         }
 
@@ -60,107 +49,137 @@ namespace Minerals.AutoCommands
             return this;
         }
 
+        public ICommandPipeline UseCommandHelpAliases(string[] aliases)
+        {
+            _helpAliases = aliases;
+            return this;
+        }
+
         public ICommandPipeline UseStringComparison(StringComparison comparison)
         {
             Comparison = comparison;
             return this;
         }
 
-        public ICommandStatement Evaluate(string[] args)
+        //TODO: Write Tool Help
+        public ICommandPipeline DisplayCommandList()
         {
+            Writer.WriteInfo($"{GetType().Name}: Pipeline Help");
+            return this;
+        }
+
+        public ICommandStatement? Evaluate(string[] args)
+        {
+            _args = args;
             try
             {
-                Args = args;
-                var command = Parser.Parse(args[0], Comparison);
-                command.Evaluate(this, args, 1);
-                return command;
+                if (args.Length <= 0)
+                {
+                    throw new CommandNotFoundException(this);
+                }
+
+                if (CheckCommandHelp(args, 0))
+                {
+                    DisplayCommandList();
+                    return null;
+                }
+
+                if (Parser.Parse(args[0], Comparison) is ICommandStatement command)
+                {
+                    var state = command.Evaluate(null, this, args, 1);
+                    return state ? command : null;
+                }
+
+                throw new CommandNotFoundException(this);
             }
             catch (Exception exception)
             {
-                if (ExceptionHandlers.TryGetValue(exception.GetType(), out var handler))
+                if (_handlers.TryGetValue(exception.GetType(), out var handler))
                 {
                     handler(exception);
                 }
-                else
+
+                if (!HandleCommandException(exception))
                 {
-                    if (!HandleCommandException(exception))
-                    {
-                        throw;
-                    }
+                    throw;
                 }
             }
-            return null!;
-        }
 
-        //TODO: Write Tool Help
-        public void DisplayHelp()
-        {
-            Writer.WriteInfo($"{GetType().Name}: Pipeline Help");
+            return null;
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public string GetUsedAlias(ICommandStatement command)
+        public string GetUsedCommandAlias(ICommandStatement? command)
         {
-            return Args.FirstOrDefault(x =>
+            return _args.FirstOrDefault(x =>
             {
-                return command.Aliases.Any(y =>
+                return command?.Aliases.Any(y =>
                 {
                     return y.Equals(x, Comparison);
-                });
+                }) == true;
             }) ?? string.Empty;
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CheckCommandHelp(string[] args, int index)
+        {
+            if (index >= args.Length)
+            {
+                return false;
+            }
+            return _helpAliases.Any(y => y.Equals(args[index], Comparison));
         }
 
         private bool HandleCommandException(Exception exception)
         {
+            if (exception is CommandNotFoundException)
+            {
+                ShowHelpForTool(exception);
+                return true;
+            }
+
             if (exception is CommandException cmdException)
             {
-                if (cmdException is CommandDuplicateException or CommandValueNotFoundException or CommandNotFoundException)
-                {
-                    ShowHelpForTool(cmdException);
-                }
-                else
-                {
-                    ShowHelpForCommand(cmdException);
-                }
+                ShowHelpForCommand(cmdException);
+                return true;
             }
-            else
-            {
-                return false;
-            }
-            return true;
+
+            return false;
         }
 
         private void ShowHelpForCommand(CommandException exception)
         {
             ShowErrorAndUsage(exception);
-            Writer.WriteInfo($"Use '{MainCommand}{GetNestedParentHelp(exception.Current)} --help' to get more information about this command.");
+            var aliases = GetAncestorCommandsAliases(exception.Current);
+            Writer.WriteInfo($"Use '{MainCommand}{aliases} --help' to get more information about this command.");
             Writer.WriteInfo("");
         }
 
-        private string GetNestedParentHelp(ICommandStatement? command, string text = "")
-        {
-            if (command != null)
-            {
-                text = $" {GetUsedAlias(command)}{text}";
-                return GetNestedParentHelp(command.Parent, text);
-            }
-            return text;
-        }
-
-        private void ShowHelpForTool(CommandException exception)
+        private void ShowHelpForTool(Exception exception)
         {
             ShowErrorAndUsage(exception);
             Writer.WriteInfo($"Use '{MainCommand} --help' to get more information about this tool.");
             Writer.WriteInfo("");
         }
 
-        private void ShowErrorAndUsage(CommandException exception)
+        private void ShowErrorAndUsage(Exception exception)
         {
             Writer.WriteError($"ERROR: {exception.Message}");
             Writer.WriteInfo($"{Title} {Version}");
             Writer.WriteInfo("");
             Writer.WriteInfo($"USAGE: {MainCommand} [Command] [Options] [Arguments]");
             Writer.WriteInfo("");
+        }
+
+        private string GetAncestorCommandsAliases(ICommandStatement? command, string text = "")
+        {
+            ICommandStatement? current = command;
+            while (current != null)
+            {
+                text = $" {GetUsedCommandAlias(current)}{text}";
+                current = current.Previous;
+            }
+            return text;
         }
     }
 }
