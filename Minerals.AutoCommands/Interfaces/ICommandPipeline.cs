@@ -18,11 +18,10 @@ namespace Minerals.AutoCommands.Interfaces
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new();
         public ICommandPipeline UseCommandParser<T>() where T : ICommandParser, new();
         public ICommandPipeline UseCommandParser(ICommandParser parser);
-        public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new();
+        public ICommandPipeline UseCommandWriter<T>(int textIndentation = 2) where T : ICommandWriter, new();
         public ICommandPipeline UseCommandWriter(ICommandWriter writer);
         public ICommandPipeline UseCommandHelpAliases(string[] aliases);
         public ICommandPipeline UseStringComparison(StringComparison comparison);
-        public ICommandPipeline DisplayCommandList();
 
         public ICommandStatement? Evaluate(string[] args);
 
@@ -31,5 +30,8 @@ namespace Minerals.AutoCommands.Interfaces
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public bool CheckCommandHelp(string[] args, int index);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CheckDescendantCommandsHelp(string[] args, int index);
     }
 }

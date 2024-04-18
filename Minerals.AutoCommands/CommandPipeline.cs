@@ -16,7 +16,7 @@ namespace Minerals.AutoCommands
         public StringComparison Comparison { get; private set; } = StringComparison.Ordinal;
 
         private string[] _args = [];
-        private string[] _helpAliases = ["-h1", "--help1"]; //TODO: Change this to normal
+        private string[] _helpAliases = ["-h1", "--help1"]; //TODO: Change this to normal -h --help
         private readonly Dictionary<Type, Action<Exception>> _handlers = [];
 
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new()
@@ -37,9 +37,9 @@ namespace Minerals.AutoCommands
             return this;
         }
 
-        public ICommandPipeline UseCommandWriter<T>() where T : ICommandWriter, new()
+        public ICommandPipeline UseCommandWriter<T>(int textIndentation = 2) where T : ICommandWriter, new()
         {
-            Writer = new T();
+            Writer = new T() { TextIndentation = textIndentation };
             return this;
         }
 
@@ -61,13 +61,6 @@ namespace Minerals.AutoCommands
             return this;
         }
 
-        //TODO: Write Tool Help
-        public ICommandPipeline DisplayCommandList()
-        {
-            Writer.WriteInfo($"{GetType().Name}: Pipeline Help");
-            return this;
-        }
-
         public ICommandStatement? Evaluate(string[] args)
         {
             _args = args;
@@ -77,20 +70,20 @@ namespace Minerals.AutoCommands
                 {
                     throw new CommandNotFoundException(this);
                 }
-
-                if (CheckCommandHelp(args, 0))
+                else if (CheckCommandHelp(args, 0))
                 {
-                    DisplayCommandList();
+                    Writer.WriteHelpForPipeline(this);
                     return null;
                 }
-
-                if (Parser.Parse(args[0], Comparison) is ICommandStatement command)
+                else if (Parser.Parse(args[0], Comparison) is ICommandStatement command)
                 {
                     var state = command.Evaluate(null, this, args, 1);
                     return state ? command : null;
                 }
-
-                throw new CommandNotFoundException(this);
+                else
+                {
+                    throw new CommandNotFoundException(this);
+                }
             }
             catch (Exception exception)
             {
@@ -98,13 +91,15 @@ namespace Minerals.AutoCommands
                 {
                     handler(exception);
                 }
-
-                if (!HandleCommandException(exception))
+                else if (exception is CommandException cmdException)
+                {
+                    Writer.WriteHelpForException(cmdException);
+                }
+                else
                 {
                     throw;
                 }
             }
-
             return null;
         }
 
@@ -130,56 +125,14 @@ namespace Minerals.AutoCommands
             return _helpAliases.Any(y => y.Equals(args[index], Comparison));
         }
 
-        private bool HandleCommandException(Exception exception)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CheckDescendantCommandsHelp(string[] args, int index)
         {
-            if (exception is CommandNotFoundException)
+            if (index >= args.Length)
             {
-                ShowHelpForTool(exception);
-                return true;
+                return false;
             }
-
-            if (exception is CommandException cmdException)
-            {
-                ShowHelpForCommand(cmdException);
-                return true;
-            }
-
-            return false;
-        }
-
-        private void ShowHelpForCommand(CommandException exception)
-        {
-            ShowErrorAndUsage(exception);
-            var aliases = GetAncestorCommandsAliases(exception.Current);
-            Writer.WriteInfo($"Use '{MainCommand}{aliases} --help' to get more information about this command.");
-            Writer.WriteInfo("");
-        }
-
-        private void ShowHelpForTool(Exception exception)
-        {
-            ShowErrorAndUsage(exception);
-            Writer.WriteInfo($"Use '{MainCommand} --help' to get more information about this tool.");
-            Writer.WriteInfo("");
-        }
-
-        private void ShowErrorAndUsage(Exception exception)
-        {
-            Writer.WriteError($"ERROR: {exception.Message}");
-            Writer.WriteInfo($"{Title} {Version}");
-            Writer.WriteInfo("");
-            Writer.WriteInfo($"USAGE: {MainCommand} [Command] [Options] [Arguments]");
-            Writer.WriteInfo("");
-        }
-
-        private string GetAncestorCommandsAliases(ICommandStatement? command, string text = "")
-        {
-            ICommandStatement? current = command;
-            while (current != null)
-            {
-                text = $" {GetUsedCommandAlias(current)}{text}";
-                current = current.Previous;
-            }
-            return text;
+            return _helpAliases.Any(x => args.Skip(index + 1).Any(y => y.Equals(x, Comparison)));
         }
     }
 }

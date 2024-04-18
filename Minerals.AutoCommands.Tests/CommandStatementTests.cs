@@ -75,24 +75,11 @@ namespace Minerals.AutoCommands.Tests
                 .Evaluate(["test4"])?
                 .Execute();
 
-            writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(6).WriteInfo(Arg.Any<string>());
-            writer.DidNotReceive().WriteWarning(Arg.Any<string>());
-            writer.Received(1).WriteError(Arg.Any<string>());
-            Received.InOrder(() =>
-            {
-                writer.WriteError("ERROR: Value for the argument 'test4' was not found.");
-                writer.WriteInfo("Test 1.0.0");
-                writer.WriteInfo("");
-                writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
-                writer.WriteInfo("");
-                writer.WriteInfo("Use 'test test4 --help' to get more information about this command.");
-                writer.WriteInfo("");
-            });
+            writer.Received(1).WriteHelpForException(Arg.Any<CommandValueNotFoundException>());
         }
 
         [TestMethod]
-        public void MultiCommandPipeline_ShouldOutputCommandNotSupportedException()
+        public void MultiCommandPipeline_ShouldOutputCommandArgumentNotSupportedException()
         {
             var writer = Substitute.For<ICommandWriter>();
             var parser = TestCommandHelpers.CreateSubstituteForCommandParser();
@@ -103,24 +90,11 @@ namespace Minerals.AutoCommands.Tests
                 .Evaluate(["test2", "test2"])?
                 .Execute();
 
-            writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(6).WriteInfo(Arg.Any<string>());
-            writer.DidNotReceive().WriteWarning(Arg.Any<string>());
-            writer.Received(1).WriteError(Arg.Any<string>());
-            Received.InOrder(() =>
-            {
-                writer.WriteError("ERROR: The argument named 'test2' is not valid for the command named 'test2'.");
-                writer.WriteInfo("Test 1.0.0");
-                writer.WriteInfo("");
-                writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
-                writer.WriteInfo("");
-                writer.WriteInfo("Use 'test test2 --help' to get more information about this command.");
-                writer.WriteInfo("");
-            });
+            writer.Received(1).WriteHelpForException(Arg.Any<CommandArgumentNotSupportedException>());
         }
 
         [TestMethod]
-        public void InvalidCommand_ShouldOutputCommandNotFoundException()
+        public void InvalidCommand_ShouldOutputCommandArgumentNotFoundException()
         {
             var writer = Substitute.For<ICommandWriter>();
             var parser = TestCommandHelpers.CreateSubstituteForCommandParser();
@@ -131,20 +105,37 @@ namespace Minerals.AutoCommands.Tests
                 .Evaluate(["test1", "test5"])?
                 .Execute();
 
-            writer.DidNotReceive().WriteDebug(Arg.Any<string>());
-            writer.Received(6).WriteInfo(Arg.Any<string>());
-            writer.DidNotReceive().WriteWarning(Arg.Any<string>());
-            writer.Received(1).WriteError(Arg.Any<string>());
-            Received.InOrder(() =>
-            {
-                writer.WriteError("ERROR: The command argument with name 'test5' was not found.");
-                writer.WriteInfo("Test 1.0.0");
-                writer.WriteInfo("");
-                writer.WriteInfo("USAGE: test [Command] [Options] [Arguments]");
-                writer.WriteInfo("");
-                writer.WriteInfo("Use 'test test1 --help' to get more information about this command.");
-                writer.WriteInfo("");
-            });
+            writer.Received(1).WriteHelpForException(Arg.Any<CommandArgumentNotFoundException>());
+        }
+
+        [TestMethod]
+        public void NoCommands_ShouldOutputCommandNotFoundException()
+        {
+            var writer = Substitute.For<ICommandWriter>();
+            var parser = TestCommandHelpers.CreateSubstituteForCommandParser();
+
+            new CommandPipeline("Test", "1.0.0", "test")
+                .UseCommandParser(parser)
+                .UseCommandWriter(writer)
+                .Evaluate([])?
+                .Execute();
+
+            writer.Received(1).WriteHelpForException(exception: Arg.Any<CommandNotFoundException>());
+        }
+
+        [TestMethod]
+        public void InvalidFirstCommand_ShouldOutputCommandNotFoundException()
+        {
+            var writer = Substitute.For<ICommandWriter>();
+            var parser = TestCommandHelpers.CreateSubstituteForCommandParser();
+
+            new CommandPipeline("Test", "1.0.0", "test")
+                .UseCommandParser(parser)
+                .UseCommandWriter(writer)
+                .Evaluate(["test9"])?
+                .Execute();
+
+            writer.Received(1).WriteHelpForException(exception: Arg.Any<CommandNotFoundException>());
         }
     }
 }

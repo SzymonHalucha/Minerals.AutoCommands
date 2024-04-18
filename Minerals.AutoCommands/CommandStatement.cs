@@ -4,6 +4,7 @@ namespace Minerals.AutoCommands
     {
         public abstract string[] Aliases { get; }
         public abstract string Description { get; }
+        public virtual string Usage { get; } = string.Empty;
         public virtual string Group { get; } = "Options";
         public virtual Regex PossibleValues { get; } = new Regex(".");
         public abstract Type[] PossibleArguments { get; }
@@ -11,9 +12,9 @@ namespace Minerals.AutoCommands
         public virtual bool ValueRequired { get; } = false;
         public virtual Type[] ArgumentsRequired { get; } = [];
 
-        public ICommandStatement? Previous { get; protected set; }
-        public ICommandStatement? Next { get; protected set; }
-        public string? Value { get; protected set; }
+        public ICommandStatement? Previous { get; protected set; } = null;
+        public ICommandStatement? Next { get; protected set; } = null;
+        public string? Value { get; protected set; } = null;
 
         protected ICommandWriter Writer { get; set; } = null!;
 
@@ -25,7 +26,7 @@ namespace Minerals.AutoCommands
             Writer ??= pipeline.Writer;
             if (pipeline.CheckCommandHelp(args, index))
             {
-                DisplayHelp();
+                Writer.WriteHelpForCommand(pipeline, this);
                 return false;
             }
             if (ValueRequired && CheckCommandValue(pipeline, args, index))
@@ -62,17 +63,15 @@ namespace Minerals.AutoCommands
             }
         }
 
-        //TODO: Write help
-        public virtual void DisplayHelp()
-        {
-            Writer.WriteInfo($"{GetType().Name}: Help");
-        }
-
         protected bool CheckCommandValue(ICommandPipeline pipeline, string[] args, int index)
         {
             if (index >= args.Length)
             {
                 throw new CommandValueNotFoundException(pipeline, this);
+            }
+            if (pipeline.CheckDescendantCommandsHelp(args, index))
+            {
+                return false;
             }
             if (pipeline.Parser.IsAlias(args[index], pipeline.Comparison))
             {
