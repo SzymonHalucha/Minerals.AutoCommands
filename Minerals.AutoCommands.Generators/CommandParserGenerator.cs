@@ -21,14 +21,14 @@ namespace Minerals.AutoCommands.Generators
         private static bool IsValidSyntax(SyntaxNode node)
         {
             return node is ClassDeclarationSyntax cls
-            && cls.BaseList != null
-            && cls.BaseList.Types.Count > 0;
+            && cls.BaseList is not null
+            && cls.BaseList.Types.Count is > 0;
         }
 
         private static bool IsValidSymbol(GeneratorSyntaxContext context)
         {
             var baseSymbol = context.SemanticModel.Compilation.GetTypeByMetadataName("Minerals.AutoCommands.CommandStatement");
-            var currentSymbol = (ITypeSymbol?)context.SemanticModel.GetDeclaredSymbol(context.Node);
+            var currentSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as ITypeSymbol;
             return SymbolEqualityComparer.Default.Equals(baseSymbol, currentSymbol?.BaseType);
         }
 
@@ -68,7 +68,7 @@ namespace Minerals.AutoCommands.Generators
             {
                 foreach (var obj in cmdObjs)
                 {
-                    if (!obj.Equals(CommandStatementObject.Empty))
+                    if (obj.Equals(CommandStatementObject.Empty) is false)
                     {
                         foreach (var alias in obj.Aliases)
                         {
@@ -90,7 +90,7 @@ namespace Minerals.AutoCommands.Generators
             {
                 foreach (var obj in cmdObjs)
                 {
-                    if (!obj.Equals(CommandStatementObject.Empty))
+                    if (obj.Equals(CommandStatementObject.Empty) is false)
                     {
                         foreach (var alias in obj.Aliases)
                         {

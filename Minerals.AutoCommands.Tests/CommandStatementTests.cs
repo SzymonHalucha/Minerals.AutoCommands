@@ -3,6 +3,8 @@ namespace Minerals.AutoCommands.Tests
     [TestClass]
     public class CommandStatementTests : VerifyBase
     {
+        private static Type[] PossibleArguments => [typeof(TestCommandHelpers.TestCommand1), typeof(TestCommandHelpers.TestCommand2), typeof(TestCommandHelpers.TestCommand3), typeof(TestCommandHelpers.TestCommand4)];
+
         [TestMethod]
         public void SingleCommandPipeline_ShouldExecuteAll()
         {
@@ -12,6 +14,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test1"])?
                 .Execute();
 
@@ -30,6 +33,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test1", "test2", "test3"])?
                 .Execute();
 
@@ -54,6 +58,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test4", "value1"])?
                 .Execute();
 
@@ -72,6 +77,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test4"])?
                 .Execute();
 
@@ -87,6 +93,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test2", "test2"])?
                 .Execute();
 
@@ -102,6 +109,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test1", "test5"])?
                 .Execute();
 
@@ -117,6 +125,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate([])?
                 .Execute();
 
@@ -132,6 +141,7 @@ namespace Minerals.AutoCommands.Tests
             new CommandPipeline("Test", "1.0.0", "test")
                 .UseCommandParser(parser)
                 .UseCommandWriter(writer)
+                .UsePossibleArguments(PossibleArguments)
                 .Evaluate(["test9"])?
                 .Execute();
 

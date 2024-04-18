@@ -65,10 +65,13 @@ namespace Minerals.AutoCommands.Generators
         private string[] GetAliasesOf(GeneratorSyntaxContext context)
         {
             var syntax = ((TypeDeclarationSyntax)context.Node).Members.OfType<PropertyDeclarationSyntax>()
-                .First(x => x.Identifier.ValueText.Equals("Aliases", StringComparison.Ordinal));
+                .First(x =>
+                {
+                    return x.Identifier.ValueText.Equals("Aliases", StringComparison.Ordinal);
+                });
 
-            IEnumerable<string> aliases = [];
             ExpressionSyntax? expression = syntax.ExpressionBody?.Expression ?? syntax.Initializer?.Value;
+            IEnumerable<string> aliases = [];
 
             if (expression is ArrayCreationExpressionSyntax array)
             {

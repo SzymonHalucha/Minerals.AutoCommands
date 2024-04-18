@@ -46,7 +46,7 @@ namespace Minerals.AutoCommands
         public virtual IEnumerable<ICommandStatement> AncestorCommands()
         {
             ICommandStatement? current = Previous;
-            while (current != null)
+            while (current is not null)
             {
                 yield return current;
                 current = current.Previous;
@@ -56,7 +56,7 @@ namespace Minerals.AutoCommands
         public virtual IEnumerable<ICommandStatement> DescendantCommands()
         {
             ICommandStatement? current = Next;
-            while (current != null)
+            while (current is not null)
             {
                 yield return current;
                 current = current.Next;
@@ -77,7 +77,7 @@ namespace Minerals.AutoCommands
             {
                 throw new CommandValueRequiredException(pipeline, this);
             }
-            if (!PossibleValues.IsMatch(args[index]))
+            if (PossibleValues.IsMatch(args[index]) is false)
             {
                 throw new CommandValueNotSupportedException(pipeline, this, args[index]);
             }
@@ -87,11 +87,11 @@ namespace Minerals.AutoCommands
         protected ICommandStatement GetNextCommand(ICommandPipeline pipeline, string[] args, int index)
         {
             var next = pipeline.Parser.Parse(args[index], pipeline.Comparison);
-            if (next == null)
+            if (next is null)
             {
                 throw new CommandArgumentNotFoundException(pipeline, this, args[index]);
             }
-            if (!PossibleArguments.Contains(next.GetType()))
+            if (PossibleArguments.Contains(next.GetType()) is false)
             {
                 throw new CommandArgumentNotSupportedException(pipeline, this, next);
             }
@@ -103,7 +103,7 @@ namespace Minerals.AutoCommands
         {
             foreach (var arg in ArgumentsRequired)
             {
-                if (!DescendantCommands().Any(x => x.GetType() == arg))
+                if (DescendantCommands().Any(x => x.GetType() == arg) is false)
                 {
                     throw new CommandArgumentRequiredException(pipeline, this, arg);
                 }

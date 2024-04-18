@@ -15,6 +15,9 @@ namespace Minerals.AutoCommands
         [EditorBrowsable(EditorBrowsableState.Never)]
         public StringComparison Comparison { get; private set; } = StringComparison.Ordinal;
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Type[] PossibleArguments { get; private set; } = [];
+
         private string[] _args = [];
         private string[] _helpAliases = ["-h1", "--help1"]; //TODO: Change this to normal -h --help
         private readonly Dictionary<Type, Action<Exception>> _handlers = [];
@@ -61,12 +64,18 @@ namespace Minerals.AutoCommands
             return this;
         }
 
+        public ICommandPipeline UsePossibleArguments(params Type[] possibleArguments)
+        {
+            PossibleArguments = possibleArguments;
+            return this;
+        }
+
         public ICommandStatement? Evaluate(string[] args)
         {
             _args = args;
             try
             {
-                if (args.Length <= 0)
+                if (args.Length is 0)
                 {
                     throw new CommandNotFoundException(this);
                 }
@@ -77,6 +86,10 @@ namespace Minerals.AutoCommands
                 }
                 else if (Parser.Parse(args[0], Comparison) is ICommandStatement command)
                 {
+                    if (PossibleArguments.Contains(command.GetType()) is false)
+                    {
+                        throw new CommandNotSupportedException(this, command);
+                    }
                     var state = command.Evaluate(null, this, args, 1);
                     return state ? command : null;
                 }
@@ -111,7 +124,7 @@ namespace Minerals.AutoCommands
                 return command?.Aliases.Any(y =>
                 {
                     return y.Equals(x, Comparison);
-                }) == true;
+                }) is true;
             }) ?? string.Empty;
         }
 

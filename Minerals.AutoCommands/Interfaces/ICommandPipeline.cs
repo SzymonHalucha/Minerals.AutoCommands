@@ -15,6 +15,9 @@ namespace Minerals.AutoCommands.Interfaces
         [EditorBrowsable(EditorBrowsableState.Never)]
         public StringComparison Comparison { get; }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Type[] PossibleArguments { get; }
+
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new();
         public ICommandPipeline UseCommandParser<T>() where T : ICommandParser, new();
         public ICommandPipeline UseCommandParser(ICommandParser parser);
@@ -22,6 +25,7 @@ namespace Minerals.AutoCommands.Interfaces
         public ICommandPipeline UseCommandWriter(ICommandWriter writer);
         public ICommandPipeline UseCommandHelpAliases(string[] aliases);
         public ICommandPipeline UseStringComparison(StringComparison comparison);
+        public ICommandPipeline UsePossibleArguments(params Type[] possibleArguments);
 
         public ICommandStatement? Evaluate(string[] args);
 

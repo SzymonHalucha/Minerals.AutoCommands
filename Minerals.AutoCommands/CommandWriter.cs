@@ -69,10 +69,12 @@ namespace Minerals.AutoCommands
             Console.WriteLine();
         }
 
-        //TODO: Display all available commands
         public void WriteHelpForPipeline(ICommandPipeline pipeline)
         {
             WriteToolHeader(pipeline);
+            Console.WriteLine();
+            WriteAllCommandsGroupsFormatedDescription(pipeline.PossibleArguments);
+            WriteHelpMessageForCommandList(pipeline, null);
             Console.WriteLine();
         }
 
@@ -82,7 +84,7 @@ namespace Minerals.AutoCommands
             Console.WriteLine();
             WriteCommandUsageInfo(pipeline, command);
             Console.WriteLine();
-            WriteCommandAllGroupsFormatedDescription(command);
+            WriteAllCommandsGroupsFormatedDescription(command.PossibleArguments);
             WriteHelpMessageForCommandList(pipeline, command);
             Console.WriteLine();
         }
@@ -94,12 +96,12 @@ namespace Minerals.AutoCommands
 
         private void WriteCommandUsageInfo(ICommandPipeline pipeline, ICommandStatement? command)
         {
-            if (command == null)
+            if (command is null)
             {
                 WriteLineInfo($"Usage: {pipeline.MainCommand} [Options]");
                 return;
             }
-            if (!command.Usage.Equals(string.Empty))
+            if (command.Usage.Equals(string.Empty) is false)
             {
                 WriteLineInfo($"USAGE: {command.Usage}");
                 return;
@@ -109,9 +111,9 @@ namespace Minerals.AutoCommands
             WriteLineInfo($"Usage: {pipeline.MainCommand}{aliases} {useValue}[Options]");
         }
 
-        private void WriteCommandAllGroupsFormatedDescription(ICommandStatement command)
+        private void WriteAllCommandsGroupsFormatedDescription(Type[] possibleArguments)
         {
-            var groups = command.PossibleArguments.Select(x => (ICommandStatement)Activator.CreateInstance(x)).ToArray();
+            var groups = possibleArguments.Select(x => (ICommandStatement)Activator.CreateInstance(x)).ToArray();
             var longestAlias = groups.Max(x => x.Aliases.Sum(y => y.Length) + x.Aliases.Length - 1);
             foreach (var group in groups.GroupBy(x => x.Group))
             {
@@ -142,7 +144,7 @@ namespace Minerals.AutoCommands
 
         private void WriteHelpMessageForCommand(ICommandPipeline pipeline, ICommandStatement? command)
         {
-            if (command == null)
+            if (command is null)
             {
                 WriteLineInfo($"Use '{pipeline.MainCommand} --help' for more information about this tool.");
                 return;
@@ -151,17 +153,17 @@ namespace Minerals.AutoCommands
             WriteLineInfo($"Use '{pipeline.MainCommand}{aliases} --help' for more information about the selected command.");
         }
 
-        private void WriteHelpMessageForCommandList(ICommandPipeline pipeline, ICommandStatement command)
+        private void WriteHelpMessageForCommandList(ICommandPipeline pipeline, ICommandStatement? command)
         {
             var aliases = GetAncestorCommandsAliases(pipeline, command);
             WriteLineInfo($"Use '{pipeline.MainCommand}{aliases} [command] --help' for more information about the selected command.");
         }
 
-        private string GetAncestorCommandsAliases(ICommandPipeline pipeline, ICommandStatement command)
+        private string GetAncestorCommandsAliases(ICommandPipeline pipeline, ICommandStatement? command)
         {
             ICommandStatement? current = command;
             string text = string.Empty;
-            while (current != null)
+            while (current is not null)
             {
                 text = $" {pipeline.GetUsedCommandAlias(current)}{text}";
                 current = current.Previous;
