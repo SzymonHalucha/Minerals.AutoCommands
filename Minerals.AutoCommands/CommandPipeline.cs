@@ -19,7 +19,7 @@ namespace Minerals.AutoCommands
         public Type[] PossibleArguments { get; private set; } = [];
 
         private string[] _args = [];
-        private string[] _helpAliases = ["-h1", "--help1"]; //TODO: Change this to normal -h --help
+        private string[] _helpAliases = ["-h", "--help"];
         private readonly Dictionary<Type, Action<Exception>> _handlers = [];
 
         public ICommandPipeline UseExceptionHandler<T>(Action<T> handler) where T : Exception, new()
