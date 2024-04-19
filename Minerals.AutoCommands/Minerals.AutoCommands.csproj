@@ -21,7 +21,7 @@
         <PackageId>Minerals.AutoCommands</PackageId>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/SzymonHalucha/Minerals.AutoCommands</PackageProjectUrl>
-        <PackageTags>attribute, attributes, generator, generation, cli, dotnet, tool, tools, commands</PackageTags>
+        <PackageTags>generator, generation, cli, dotnet, tool, tools, commands, pipeline</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageReleaseNotes>Generator optimization and API changes</PackageReleaseNotes>
         <IsPackable>true</IsPackable>
