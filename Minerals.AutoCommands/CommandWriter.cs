@@ -60,12 +60,13 @@ namespace Minerals.AutoCommands
 
         public void WriteHelpForException(CommandException exception)
         {
+            var command = exception is not CommandNotSupportedException ? exception.Current : null;
             WriteLineError($"ERROR: {exception.Message}");
             WriteLineInfo($"{exception.Pipeline.Title} {exception.Pipeline.Version}");
             Console.WriteLine();
-            WriteCommandUsageInfo(exception.Pipeline, exception.Current);
+            WriteCommandUsageInfo(exception.Pipeline, command);
             Console.WriteLine();
-            WriteHelpMessageForCommand(exception.Pipeline, exception.Current);
+            WriteHelpMessageForCommand(exception.Pipeline, command);
             Console.WriteLine();
         }
 
