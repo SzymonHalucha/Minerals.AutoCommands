@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.2.0</Version>
+        <Version>0.2.1</Version>
         <Title>AutoCommands</Title>
         <Authors>Szymon Hałucha</Authors>
         <Product>AutoCommands</Product>
@@ -23,7 +23,7 @@
         <PackageProjectUrl>https://github.com/SzymonHalucha/Minerals.AutoCommands</PackageProjectUrl>
         <PackageTags>generator, generation, cli, dotnet, tool, tools, commands, pipeline</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageReleaseNotes>Generator optimization and API changes</PackageReleaseNotes>
+        <PackageReleaseNotes>Fixed bug with the CodeBuilder enumeration methods</PackageReleaseNotes>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
 
