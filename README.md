@@ -4,6 +4,8 @@
 ![NuGet Version](https://img.shields.io/nuget/v/Minerals.AutoCommands?style=for-the-badge)
 ![NuGet Downloads](https://img.shields.io/nuget/dt/Minerals.AutoCommands?style=for-the-badge)
 
+[Package on nuget.org](https://github.com/SzymonHalucha/Minerals.AutoCommands)
+
 This NuGet package simplifies development of console tools in C# by automating command parsing. It eliminates need to manually write code to handle arguments, commands and commands helps, allowing you to focus on the logic of the tool.
 
 ## Features
@@ -23,7 +25,7 @@ Add the Minerals.AutoCommands nuget package to your C# project using the followi
 ### 1. Project file definition
 
 ```xml
-<PackageReference Include="Minerals.AutoCommands" Version="0.2.*" />
+<PackageReference Include="Minerals.AutoCommands" Version="0.2.1" />
 ```
 
 ### 2. dotnet command
